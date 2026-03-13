@@ -15,7 +15,7 @@ public class Account {
 	public String getID() {
 		return this.id;
 	}
-	
+
 	public double getBalance() {
 		return this.balance;
 	}

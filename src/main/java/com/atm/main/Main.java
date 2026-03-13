@@ -32,7 +32,36 @@ public class Main {
 			while(userSession) {
 				System.out.println("1. Balance\n2. Withdraw\n3. Deposit\n4. Logout");
 				String choice = keyboard.nextLine();
-				if(choice.equals("4")) {
+				if(choice.equals("1")) {
+					System.out.println("Balance: " + currentSession.getBalance() + "\n");
+				}
+				else if(choice.equals("2")) {
+					System.out.println("Withdraw: ");
+					try {
+						String inputString = keyboard.nextLine();
+						double input = Double.parseDouble(inputString);
+						System.out.print("Current balance: " + currentSession.getBalance() + "\n"
+								+ "New balance: " + (currentSession.getBalance() - input) + "\n");
+						currentSession.withdraw(input);
+					}
+					catch (NumberFormatException e) {
+						System.out.println("Please input a valid number");
+					}
+				}
+				else if(choice.equals("3")) {
+					System.out.println("Deposit: ");
+					try {
+						String inputString = keyboard.nextLine();
+						double input = Double.parseDouble(inputString);
+						System.out.print("Current balance: " + currentSession.getBalance() + "\n"
+								+ "New balance: " + (currentSession.getBalance() + input) + "\n");
+						currentSession.deposit(input);
+					}
+					catch (NumberFormatException e) {
+						System.out.println("Please input a valid number");
+					}
+				}
+				else if(choice.equals("4")) {
 					userSession = false;
 				}
 			}
@@ -41,6 +70,9 @@ public class Main {
 			String con = keyboard.nextLine();
 			if(con.equals("y") || con.equals("yes")) {
 				running = false;
+			}
+			if(con.equals("n") || con.equals("no")) {
+				running = true;
 			}
 		}
 	}
