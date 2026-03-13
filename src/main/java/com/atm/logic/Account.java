@@ -5,10 +5,15 @@ public class Account {
 	private String pin;
 	private double balance;
 	
-	public Account(String id, String pin, double balance) {
-		this.id = id;
+	public Account(String pin, double balance) {
 		this.pin = pin;
 		this.balance = Math.max(0, balance);
+	}
+	public void setID(String id) {
+		this.id = id;
+	}
+	public String getID() {
+		return this.id;
 	}
 	
 	public double getBalance() {
