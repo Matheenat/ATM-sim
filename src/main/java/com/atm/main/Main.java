@@ -1,10 +1,13 @@
 package com.atm.main;
 import com.atm.logic.*;
+import com.atm.data.*;
 import java.util.Scanner;
 public class Main {
 
 	public static void main(String[] args) {
 		Bank myBank = new Bank();
+		FileHandler fh = new FileHandler();
+		fh.loadAccounts(myBank);
 		Scanner keyboard = new Scanner(System.in);
 		boolean running = true;
 		
@@ -26,53 +29,80 @@ public class Main {
 			    System.out.println("Login Successful!\n");
 			} else {
 			    System.out.println("Access Denied: Invalid ID or PIN.");
-			    running = false;
 			}
 			
 			while(userSession) {
-				System.out.println("1. Balance\n2. Withdraw\n3. Deposit\n4. Logout");
+				System.out.println("1. Balance\n2. Withdraw\n3. Deposit\n4. Transfer\n5. Logout");
 				String choice = keyboard.nextLine();
-				if(choice.equals("1")) {
+				switch(choice) {
+				case "1":
 					System.out.println("Balance: " + currentSession.getBalance() + "\n");
-				}
-				else if(choice.equals("2")) {
+					break;
+					
+				case "2":
 					System.out.println("Withdraw: ");
 					try {
-						String inputString = keyboard.nextLine();
-						double input = Double.parseDouble(inputString);
-						System.out.print("Current balance: " + currentSession.getBalance() + "\n"
-								+ "New balance: " + (currentSession.getBalance() - input) + "\n");
+						String inputString = keyboard.next();
+						double input = Double.parseDouble(inputString);						
 						currentSession.withdraw(input);
+						fh.saveAccounts(myBank.getAllAccounts());
 					}
 					catch (NumberFormatException e) {
 						System.out.println("Please input a valid number");
 					}
-				}
-				else if(choice.equals("3")) {
+					break;
+					
+				case "3":
 					System.out.println("Deposit: ");
 					try {
-						String inputString = keyboard.nextLine();
+						String inputString = keyboard.next();
 						double input = Double.parseDouble(inputString);
-						System.out.print("Current balance: " + currentSession.getBalance() + "\n"
-								+ "New balance: " + (currentSession.getBalance() + input) + "\n");
 						currentSession.deposit(input);
+						fh.saveAccounts(myBank.getAllAccounts());
 					}
 					catch (NumberFormatException e) {
 						System.out.println("Please input a valid number");
 					}
-				}
-				else if(choice.equals("4")) {
+					break;
+				case "4":
+					System.out.println("Recipient Id: ");
+					String targetId = keyboard.next();
+					Account receiver = myBank.getAccountId(targetId);
+					
+					if (receiver != null && receiver != currentSession) {
+				        System.out.print("Enter amount to transfer: ");
+				        double amount = Double.parseDouble(keyboard.nextLine());
+				        
+				        if (currentSession.transfer(receiver, amount)) {
+				            System.out.println("Transfer successful!");
+				            fh.saveAccounts(myBank.getAllAccounts()); 
+				        } else {
+				            System.out.println("Transfer failed: Insufficient funds.");
+				        }
+				    } else {
+				        System.out.println("Error: Recipient not found or invalid.");
+				    }
+				    break;
+					
+				case "5":
 					userSession = false;
+					System.out.print("Do you want to quit\n");
+					String con = keyboard.nextLine();
+					if(con.equals("y") || con.equals("yes")) {
+						running = false;
+						fh.saveAccounts(myBank.getAllAccounts());
+					}
+					if(con.equals("n") || con.equals("no")) {
+						running = true;
+					}
+					break;
+					
+				case "rem acc":
+					System.out.print("Account to delete: ");
+					String target = keyboard.nextLine();
+					myBank.removeAccount(target);
+					fh.saveAccounts(myBank.getAllAccounts());
 				}
-			}
-			
-			System.out.print("Do you want to quit\n");
-			String con = keyboard.nextLine();
-			if(con.equals("y") || con.equals("yes")) {
-				running = false;
-			}
-			if(con.equals("n") || con.equals("no")) {
-				running = true;
 			}
 		}
 	}

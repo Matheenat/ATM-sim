@@ -15,7 +15,11 @@ public class Account {
 	public String getID() {
 		return this.id;
 	}
-
+	
+	public String getPin() {
+		return this.pin;
+	}
+	
 	public double getBalance() {
 		return this.balance;
 	}
@@ -42,5 +46,14 @@ public class Account {
 		else {
 			return false;
 		}
+	}
+	
+	public boolean transfer(Account receiver, double amount) {
+		if(this.withdraw(amount)) {
+			receiver.deposit(amount);
+			return true;
+		}
+		
+		return false;
 	}
 }
