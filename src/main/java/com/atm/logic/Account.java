@@ -1,9 +1,11 @@
 package com.atm.logic;
-
+import java.util.ArrayList;
+import java.util.List;
 public class Account {
 	private String id;
 	private String pin;
 	private double balance;
+	private List<String> transactionHistory = new ArrayList<>();
 	
 	public Account(String pin, double balance) {
 		this.pin = pin;
@@ -24,6 +26,14 @@ public class Account {
 		return this.balance;
 	}
 	
+	public List<String> getTransactionHistory(){
+		return this.transactionHistory;
+	}
+	
+	public void addHistoryRecord(String StringText) {
+		this.transactionHistory.add(StringText);
+	}
+	
 	public boolean validatePin(String inputPin) {
 		return this.pin.equals(inputPin);
 	}
@@ -31,6 +41,7 @@ public class Account {
 	public boolean withdraw(double amount) {
 		if(amount > 0 && amount <= this.balance) {
 			this.balance -= amount;
+			this.transactionHistory.add("withdraw $" + amount);
 			return true;
 		}
 		else {
@@ -41,6 +52,7 @@ public class Account {
 	public boolean deposit(double amount) {
 		if(amount > 0) {
 			this.balance += amount;
+			this.transactionHistory.add("deposit $" + amount);
 			return true;
 		}
 		else {
@@ -51,6 +63,7 @@ public class Account {
 	public boolean transfer(Account receiver, double amount) {
 		if(this.withdraw(amount)) {
 			receiver.deposit(amount);
+			this.transactionHistory.add("transfer $" + amount + " to account id: " + receiver.getID());
 			return true;
 		}
 		

@@ -9,10 +9,15 @@ public class FileHandler {
 	public void saveAccounts(Map<String, Account> accounts) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             for (Account acc : accounts.values()) {
-                String line = acc.getID() + "," + 
-                              acc.getPin() + "," + 
-                              acc.getBalance();
-                writer.println(line);
+                StringBuilder line = new StringBuilder();
+                line.append(acc.getID()).append(",")
+                .append(acc.getPin()).append(",")
+                .append(acc.getBalance());
+                
+                for (String record : acc.getTransactionHistory()) {
+                    line.append(",").append(record);
+                }
+                writer.println(line.toString());
             }
             System.out.println("Data saved successfully.");
         } catch (IOException e) {
@@ -29,7 +34,7 @@ public class FileHandler {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 String[] parts = line.split(",");
-
+                
                 String id = parts[0];
                 String pin = parts[1];
                 double balance = Double.parseDouble(parts[2]);
