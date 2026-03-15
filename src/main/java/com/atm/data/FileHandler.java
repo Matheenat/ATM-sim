@@ -41,6 +41,11 @@ public class FileHandler {
 
                 Account acc = new Account(pin, balance);
                 acc.setID(id);
+                
+                for (int i = 3; i < parts.length; i++) {
+                    acc.addHistoryRecord(parts[i]); 
+                }
+                
                 bank.addAccount(acc); 
 
                 maxId = Math.max(maxId, Integer.parseInt(id));

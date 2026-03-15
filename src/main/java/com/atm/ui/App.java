@@ -187,16 +187,25 @@ public class App extends Application{
 	    transferBtn.setMaxWidth(Double.MAX_VALUE);
 	    settingsBtn.setMaxWidth(Double.MAX_VALUE);
 	    
-	    String buttonStyle = "-fx-font-family: 'Inter'; -fx-font-size: 20px; -fx-padding: 15;";
+	    String buttonStyle = "-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 20px; "
+	    		+ "-fx-padding: 15;";
+	    
 	    checkBalanceBtn.setStyle(buttonStyle);
 	    withdrawBtn.setStyle(buttonStyle);
 	    depositBtn.setStyle(buttonStyle);
 	    transferBtn.setStyle(buttonStyle);
 	    settingsBtn.setStyle(buttonStyle);
 
-	    leftBar.getChildren().addAll(withdrawBtn, depositBtn, transferBtn, settingsBtn);
+	    leftBar.getChildren().addAll(checkBalanceBtn, withdrawBtn, depositBtn, transferBtn, settingsBtn);
+	    checkBalanceBtn.setOnAction(e -> {
+	    	mainLayout.setCenter(balanceView());
+	    });
 	    withdrawBtn.setOnAction(e -> {
-	    	mainLayout.setCenter(WithdrawView());
+	    	mainLayout.setCenter(withdrawView());
+	    });
+	    depositBtn.setOnAction(e -> {
+	    	mainLayout.setCenter(depositView());
 	    });
 	    
 	    mainLayout.setLeft(leftBar);
@@ -204,7 +213,8 @@ public class App extends Application{
 	    VBox rightBar = new VBox(20);
 	    rightBar.setPadding(new Insets(10));
 	    rightBar.setMinWidth(200);
-	    rightBar.setStyle("-fx-border-color: black; -fx-border-width: 0 0 0 1;");
+	    rightBar.setStyle("-fx-border-color: black; "
+	    		+ "-fx-border-width: 0 0 0 1;");
 	    rightBar.getChildren().add(new Label("Account Summary"));
 	    mainLayout.setRight(rightBar);
 	    
@@ -227,11 +237,10 @@ public class App extends Application{
 	
 	private void executeTransaction(String TransactionType, Double amount) {
 		if (TransactionType.equals("Withdraw")) {
-	        currentAccount.withdraw(amount);
-	        fh.saveAccounts(myBank.getAllAccounts());
+	        this.currentAccount.withdraw(amount);
 	    } 
 		else if (TransactionType.equals("Deposit")) {
-	        currentAccount.deposit(amount);
+			this.currentAccount.deposit(amount);
 	    }
 		else if (TransactionType.equals("Transfer")) {
 			
@@ -240,12 +249,18 @@ public class App extends Application{
 	}
 	
 	private Node pinConfirmation(String TransactionType, Double amount) {
-		VBox layout = new VBox(20);
+		VBox layout = new VBox(15);
 	    layout.setAlignment(Pos.CENTER);
 	    Label statusLabel = new Label("");
-	    Label header = new Label("Confirm " + TransactionType);
-	    Label subHeader = new Label("Amount: $" + amount);
-	    header.setStyle("-fx-font-family: 'Inter'; -fx-font-size: 22px; -fx-font-weight: bold;");
+	    Label header = new Label("Input PIN to proceed");
+	    header.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 22px; "
+	    		+ "-fx-font-weight: bold;");
+	    
+	    Label subHeader = new Label(TransactionType + " $" + amount + "?");
+	    subHeader.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 14px; "
+	    		+ "-fx-font-weight: bold;");
 
 	    PasswordField pinField = new PasswordField();
 	    pinField.setMaxWidth(200);
@@ -267,13 +282,51 @@ public class App extends Application{
 	    layout.getChildren().addAll(statusLabel, header, subHeader, pinField, confirmBtn);
 	    return layout;
 	}
-	
-	private Node WithdrawView() {
+	private Node balanceView() {
+		VBox layout = new VBox(20);
+	    layout.setPadding(new Insets(50));
+	    layout.setAlignment(Pos.CENTER);
+	    
+	    layout.setStyle("-fx-background-color: #FFFFFF; "
+	    		+ "-fx-background-radius: 20; "
+	    		+ "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 10);");
+	    layout.setMaxSize(500, 300);
+
+	    Label titleLabel = new Label("Available Balance");
+	    titleLabel.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 18px; "
+	    		+ "-fx-text-fill: #555555;");
+
+	    double currentBalance = currentAccount.getBalance();
+	    Label amountLabel = new Label("$" + String.format("%.2f", currentBalance));
+
+	    amountLabel.setStyle("-fx-font-family: 'Roboto'; "
+	    		+ "-fx-font-size: 60px; -fx-font-weight: bold; "
+	    		+ "-fx-text-fill: #2C3E50;");
+
+	    Label accIdLabel = new Label("Account ID: " + currentAccount.getID());
+	    accIdLabel.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 14px; "
+	    		+ "-fx-text-fill: #999999;");
+
+	    Button backBtn = new Button("Return to Dashboard");
+	    backBtn.setStyle("-fx-background-color: #81A6C6; "
+	    		+ "-fx-text-fill: white; "
+	    		+ "-fx-padding: 10 20;");
+	    
+	    backBtn.setOnAction(e -> showDashboard());
+
+	    layout.getChildren().addAll(titleLabel, amountLabel, accIdLabel, backBtn);
+	    
+	    return layout;
+	}
+	private Node withdrawView() {
 		VBox layout = new VBox(20);
 	    layout.setPadding(new Insets(30));
 	    
 	    Label title = new Label("Withdraw Cash");
-	    title.setStyle("-fx-font-family: 'Inter'; -fx-font-size: 24px;");
+	    title.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 24px;");
 	    
 	    TextField amountField = new TextField();
 	    amountField.setPromptText("Enter amount...");
@@ -283,34 +336,78 @@ public class App extends Application{
 	    Button confirmBtn = new Button("Confirm Withdrawal");
 	    confirmBtn.setOnAction(e -> {
 	    	String stringAmount = amountField.getText().trim();
-		    if(stringAmount.isEmpty()) {
-		    	statusLabel.setText("Error: Please enter an amount.");
+
+	    	if(stringAmount.isEmpty()) {
+		    	statusLabel.setText("Error: Please enter a valid number.");
 	            statusLabel.setStyle("-fx-text-fill: red;");
 	            return;
-		    }
-		    else {
-		    	try {
-		    		Double amount = Double.parseDouble(stringAmount);
-		    		if(amount <= 0) {
-		    			statusLabel.setText("Error: Amount must be greater than 0.");
-		                statusLabel.setStyle("-fx-text-fill: red;");
-		                return;
-		    		}
-		    		if (amount > currentAccount.getBalance()) {
-		                statusLabel.setText("Error: Insufficient funds.");
-		                statusLabel.setStyle("-fx-text-fill: red;");
-		                return;
-		            }
-		    		mainLayout.setCenter(pinConfirmation("Withdraw", amount));
-		    	}
-		    	catch(NumberFormatException ex) {
-		    		statusLabel.setText("Error: Please enter a valid number.");
-		            statusLabel.setStyle("-fx-text-fill: red;");
-		    	}
-		    }
+	    	}
+            try {
+	    		Double amount = Double.parseDouble(stringAmount);
+	    		if(amount <= 0) {
+	    			statusLabel.setText("Error: Amount must be greater than 0.");
+	                statusLabel.setStyle("-fx-text-fill: red;");
+	                return;
+	    		}
+	    		if (amount > currentAccount.getBalance()) {
+	                statusLabel.setText("Error: Insufficient funds.");
+	                statusLabel.setStyle("-fx-text-fill: red;");
+	                return;
+	            }
+	    		mainLayout.setCenter(pinConfirmation("Withdraw", amount));
+	    	}
+	    	
+	    	catch(NumberFormatException ex) {
+	    		statusLabel.setText("Error: Please enter a valid number.");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	    	}
+		    
 	    });
 	    
-	    layout.getChildren().addAll(title, amountField, confirmBtn);
+	    layout.getChildren().addAll(title, statusLabel, amountField, confirmBtn);
+	    return layout;
+	}
+	
+	private Node depositView() {
+		VBox layout = new VBox(20);
+	    layout.setPadding(new Insets(30));
+	    
+	    Label title = new Label("Deposit Cash");
+	    title.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 24px;");
+	    
+	    TextField amountField = new TextField();
+	    amountField.setPromptText("Enter amount...");
+	    
+	    Label statusLabel = new Label("");
+	    
+	    Button confirmBtn = new Button("Confirm Deposition");
+	    confirmBtn.setOnAction(e -> {
+	    	String stringAmount = amountField.getText().trim();
+
+	    	if(stringAmount.isEmpty()) {
+		    	statusLabel.setText("Error: Please enter a valid number.");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+	    	}
+            try {
+	    		Double amount = Double.parseDouble(stringAmount);
+	    		if(amount <= 0) {
+	    			statusLabel.setText("Error: Amount must be greater than 0.");
+	                statusLabel.setStyle("-fx-text-fill: red;");
+	                return;
+	    		}
+	    		mainLayout.setCenter(pinConfirmation("Deposit", amount));
+	    	}
+	    	
+	    	catch(NumberFormatException ex) {
+	    		statusLabel.setText("Error: Please enter a valid number.");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	    	}
+		    
+	    });
+	    
+	    layout.getChildren().addAll(title, statusLabel, amountField, confirmBtn);
 	    return layout;
 	}
 }
