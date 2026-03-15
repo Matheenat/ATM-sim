@@ -1,5 +1,7 @@
 package com.atm.logic;
+
 import java.util.HashMap;
+
 import java.util.Map;
 public class Bank {
 	private Map<String, Account> accounts = new HashMap<>();

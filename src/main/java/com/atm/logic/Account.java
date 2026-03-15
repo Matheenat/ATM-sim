@@ -1,5 +1,7 @@
 package com.atm.logic;
+
 import java.util.ArrayList;
+
 import java.util.List;
 public class Account {
 	private String id;
