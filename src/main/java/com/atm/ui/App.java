@@ -1,26 +1,35 @@
 package com.atm.ui;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import com.atm.logic.*;
 import com.atm.data.*;
+import com.atm.util.FontsLoader;
 
 public class App extends Application{
 	private Stage window;
+	private BorderPane mainLayout;
+	private Account currentAccount;
+	private int screenWidth = 1408;
+	private int screenHeight = 896;
+	private int smallscreenWidth = 300;
+	private int smallscreenHeight = 400;
 	Bank myBank = new Bank();
 	FileHandler fh = new FileHandler();
 	@Override
     public void start(Stage primaryStage) {
+		FontsLoader.loadFonts();
 		this.window = primaryStage;
 		fh.loadAccounts(myBank);
 		
         StackPane root = new StackPane();
-        Scene scene = new Scene(root, 1408, 896);
+        Scene scene = new Scene(root, screenWidth, screenHeight);
 
         primaryStage.setTitle("Atm-Sim");
         primaryStage.setScene(scene);
@@ -43,7 +52,8 @@ public class App extends Application{
 		loginbtn.setOnAction(e -> {
 			Account acc = myBank.loginCheck(idField.getText(), pinField.getText());
 			if (acc != null) {
-				showDashboard(acc);
+				this.currentAccount = acc;
+				showDashboard();
 				
 		    } 
 			else {
@@ -61,7 +71,7 @@ public class App extends Application{
 		grid.add(pinField, 0, 4);
 		grid.add(loginbtn, 0, 5);
 		grid.add(signupbtn, 0, 6);
-		Scene loginScene = new Scene(grid, 300, 400);
+		Scene loginScene = new Scene(grid, smallscreenWidth, smallscreenHeight);
 	    window.setScene(loginScene);
 	    window.show();
 	}
@@ -118,7 +128,7 @@ public class App extends Application{
 	    grid.add(startDeposit, 0, 3);
 	    grid.add(depositField, 0, 4);
 	    grid.add(createAcc, 0, 5);
-	    Scene signupScene = new Scene(grid, 300, 400);
+	    Scene signupScene = new Scene(grid, smallscreenWidth, smallscreenHeight);
 	    window.setScene(signupScene);
 	    window.show();
 	}
@@ -139,18 +149,168 @@ public class App extends Application{
 	    grid.add(success, 0, 0);
 	    grid.add(userid, 0, 1);
 	    grid.add(confirm, 0, 2);
-	    Scene successScene = new Scene(grid, 300, 400);
+	    Scene successScene = new Scene(grid, smallscreenWidth, smallscreenHeight);
 	    window.setScene(successScene);
 	    window.show();
 	}
 	
-	public void showDashboard(Account acc) {
-		Label welcome = new Label("test ui 123 123 12 12 1");
-	    Scene dashScene = new Scene(new StackPane(welcome), 300, 400);
-	    window.setScene(dashScene);
-	}
+	public void showDashboard() {
+	    this.mainLayout = new BorderPane();
+	    HBox headBar = new HBox();
+	    headBar.setPadding(new Insets(10));
+	    headBar.setStyle("-fx-background-color: #81A6C6;"
+	    		+ "-fx-border-color: #81A6C6; "
+	    		+ "-fx-border-width: 0 0 1 0;");
+	    
+	    Label atmTitleLabel = new Label("ATM Simulator");
+	    atmTitleLabel.setStyle("-fx-font-family: 'Roboto';"
+	    		+ "-fx-font-weight: bold;"
+	    		+ "-fx-font-size: 40px;");
+	    headBar.getChildren().add(atmTitleLabel);
+	    mainLayout.setTop(headBar);
+	    
+	    VBox leftBar = new VBox(20);
+	    leftBar.setPadding(new Insets(10));
+	    leftBar.setMinWidth(300);
+	    leftBar.setStyle("-fx-background-color: #AACDDC; "
+	    		+ "-fx-border-color: #AACDDC; "
+	    		+ "-fx-border-width: 0 1 0 0;");
+	    
+	    Button checkBalanceBtn = new Button("Balance");
+	    Button withdrawBtn = new Button("Withdraw");
+	    Button depositBtn = new Button("Deposit");
+	    Button transferBtn = new Button("Transfer");
+	    Button settingsBtn = new Button("Settings");
+	    checkBalanceBtn.setMaxWidth(Double.MAX_VALUE);
+	    withdrawBtn.setMaxWidth(Double.MAX_VALUE);
+	    depositBtn.setMaxWidth(Double.MAX_VALUE);
+	    transferBtn.setMaxWidth(Double.MAX_VALUE);
+	    settingsBtn.setMaxWidth(Double.MAX_VALUE);
+	    
+	    String buttonStyle = "-fx-font-family: 'Inter'; -fx-font-size: 20px; -fx-padding: 15;";
+	    checkBalanceBtn.setStyle(buttonStyle);
+	    withdrawBtn.setStyle(buttonStyle);
+	    depositBtn.setStyle(buttonStyle);
+	    transferBtn.setStyle(buttonStyle);
+	    settingsBtn.setStyle(buttonStyle);
 
-    public static void main(String[] args) {
-        launch(args);
-    }
+	    leftBar.getChildren().addAll(withdrawBtn, depositBtn, transferBtn, settingsBtn);
+	    withdrawBtn.setOnAction(e -> {
+	    	mainLayout.setCenter(WithdrawView());
+	    });
+	    
+	    mainLayout.setLeft(leftBar);
+
+	    VBox rightBar = new VBox(20);
+	    rightBar.setPadding(new Insets(10));
+	    rightBar.setMinWidth(200);
+	    rightBar.setStyle("-fx-border-color: black; -fx-border-width: 0 0 0 1;");
+	    rightBar.getChildren().add(new Label("Account Summary"));
+	    mainLayout.setRight(rightBar);
+	    
+	    GridPane centerGrid = new GridPane();
+	    centerGrid.setHgap(20);
+	    centerGrid.setPadding(new Insets(20));
+	    centerGrid.setAlignment(Pos.CENTER);
+	    
+	    VBox gainChart = new VBox(new Label("Money Gain Chart Placeholder"));
+	    VBox goneChart = new VBox(new Label("Money Gone Chart Placeholder"));
+	    
+	    centerGrid.add(gainChart, 0, 0);
+	    centerGrid.add(goneChart, 1, 0);
+	    mainLayout.setCenter(centerGrid);
+	    
+	    Scene dashBoardScene = new Scene(mainLayout, screenWidth, screenHeight);
+	    window.setScene(dashBoardScene);
+	    window.show();
+	}
+	
+	private void executeTransaction(String TransactionType, Double amount) {
+		if (TransactionType.equals("Withdraw")) {
+	        currentAccount.withdraw(amount);
+	        fh.saveAccounts(myBank.getAllAccounts());
+	    } 
+		else if (TransactionType.equals("Deposit")) {
+	        currentAccount.deposit(amount);
+	    }
+		else if (TransactionType.equals("Transfer")) {
+			
+		}
+		fh.saveAccounts(myBank.getAllAccounts());
+	}
+	
+	private Node pinConfirmation(String TransactionType, Double amount) {
+		VBox layout = new VBox(20);
+	    layout.setAlignment(Pos.CENTER);
+	    Label statusLabel = new Label("");
+	    Label header = new Label("Confirm " + TransactionType);
+	    Label subHeader = new Label("Amount: $" + amount);
+	    header.setStyle("-fx-font-family: 'Inter'; -fx-font-size: 22px; -fx-font-weight: bold;");
+
+	    PasswordField pinField = new PasswordField();
+	    pinField.setMaxWidth(200);
+
+	    Button confirmBtn = new Button("Authorize");
+	    confirmBtn.setStyle("-fx-background-color: #00A950; -fx-text-fill: white;");
+
+	    confirmBtn.setOnAction(e -> {
+	        if(currentAccount != null && currentAccount.validatePin(pinField.getText())) {
+	        	executeTransaction(TransactionType, amount);
+	        	showDashboard();
+	        }
+	        else {
+	        	statusLabel.setText("Invalid PIN!");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	        }
+	    });
+
+	    layout.getChildren().addAll(statusLabel, header, subHeader, pinField, confirmBtn);
+	    return layout;
+	}
+	
+	private Node WithdrawView() {
+		VBox layout = new VBox(20);
+	    layout.setPadding(new Insets(30));
+	    
+	    Label title = new Label("Withdraw Cash");
+	    title.setStyle("-fx-font-family: 'Inter'; -fx-font-size: 24px;");
+	    
+	    TextField amountField = new TextField();
+	    amountField.setPromptText("Enter amount...");
+	    
+	    Label statusLabel = new Label("");
+	    
+	    Button confirmBtn = new Button("Confirm Withdrawal");
+	    confirmBtn.setOnAction(e -> {
+	    	String stringAmount = amountField.getText().trim();
+		    if(stringAmount.isEmpty()) {
+		    	statusLabel.setText("Error: Please enter an amount.");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+		    }
+		    else {
+		    	try {
+		    		Double amount = Double.parseDouble(stringAmount);
+		    		if(amount <= 0) {
+		    			statusLabel.setText("Error: Amount must be greater than 0.");
+		                statusLabel.setStyle("-fx-text-fill: red;");
+		                return;
+		    		}
+		    		if (amount > currentAccount.getBalance()) {
+		                statusLabel.setText("Error: Insufficient funds.");
+		                statusLabel.setStyle("-fx-text-fill: red;");
+		                return;
+		            }
+		    		mainLayout.setCenter(pinConfirmation("Withdraw", amount));
+		    	}
+		    	catch(NumberFormatException ex) {
+		    		statusLabel.setText("Error: Please enter a valid number.");
+		            statusLabel.setStyle("-fx-text-fill: red;");
+		    	}
+		    }
+	    });
+	    
+	    layout.getChildren().addAll(title, amountField, confirmBtn);
+	    return layout;
+	}
 }
