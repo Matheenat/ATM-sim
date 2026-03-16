@@ -186,12 +186,12 @@ public class App extends Application{
 	    VBox welcomeGroup = new VBox(2);
 	    Label welcomeLabel = new Label("Welcome back!");
 	    welcomeLabel.setStyle("-fx-font-family: 'Roboto'; "
-	    		+ "-fx-font-color: black; "
+	    		+ "-fx-text-fill: black; "
 	    		+ "-fx-font-size: 34px");
 	    
 	    Label userLabel = new Label(currentAccount.getName());
 	    userLabel.setStyle("-fx-font-family: 'Roboto'; "
-	    		+ "-fx-font-color: black; "
+	    		+ "-fx-text-fill: black; "
 	    		+ "-fx-font-size: 23px");
 	    userLabel.setMaxWidth(300);
 	    userLabel.setEllipsisString("...");
@@ -237,6 +237,7 @@ public class App extends Application{
 	    rightBar.setMinWidth(200);
 	    rightBar.setStyle("-fx-border-color: black; "
 	    		+ "-fx-border-width: 0 0 0 1;");
+	    
 	    rightBar.getChildren().add(new Label("Account Summary"));
 	    mainLayout.setRight(rightBar);
 	    
