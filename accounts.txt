@@ -1,4 +1,4 @@
-1,456456,6123.0,JOHN,receieve $1000.0,receieve $1000.0,withdraw $10000.0,transfer $6000.0 to account id: 4
+1,123123,9990000.0,JOHN,receieve $1000.0,receieve $1000.0,withdraw $10000.0,transfer $6000.0 to account id: 4,withdraw $10000.0
 2,234234,10100.0,New user,receieve $100.0
 3,345345,3000.0,ชื่อไทยเทสๆ
 4,123123,108023.0,Alligator Johnson the 3rd,transfer $1000.0 to account id: 1,transfer $100.0 to account id: 2,receieve $6000.0

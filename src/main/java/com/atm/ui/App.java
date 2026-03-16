@@ -1,5 +1,6 @@
 package com.atm.ui;
 
+import java.util.List;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -204,7 +205,7 @@ public class App extends Application{
 	    leftBar.setPadding(new Insets(10));
 	    leftBar.setMinWidth(300);
 	    leftBar.setStyle("-fx-background-color: #AACDDC; "
-	    		+ "-fx-border-color: #AACDDC; "
+	    		+ "-fx-border-color: #93b4c2; "
 	    		+ "-fx-border-width: 0 1 0 0;");
 	    
 	    VBox welcomeGroup = new VBox(2);
@@ -264,12 +265,27 @@ public class App extends Application{
 
 	    VBox rightBar = new VBox(20);
 	    rightBar.setPadding(new Insets(10));
-	    rightBar.setMinWidth(200);
-	    rightBar.setStyle("-fx-border-color: black; "
+	    rightBar.setMinWidth(250);
+	    rightBar.setStyle("-fx-background-color: #E6F0F5; "
+	    		+ "-fx-border-color: #AACDDC; "
 	    		+ "-fx-border-width: 0 0 0 1;");
+	    ScrollPane scrollHistory = new ScrollPane(rightBar);
+	    scrollHistory.setFitToWidth(true);
+	    scrollHistory.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 	    
 	    rightBar.getChildren().add(new Label("Account Summary"));
-	    mainLayout.setRight(rightBar);
+	    
+	    List<String> history = currentAccount.getTransactionHistory();
+	    for(int i = history.size() - 1; i > 0; i--) {
+	    	String line = history.get(i);
+	    	Label currentLine = new Label(line);
+	    	currentLine.setStyle("-fx-background-color: white; -fx-padding: 10; "
+                    + "-fx-background-radius: 5; -fx-border-color: #DDD;");
+	    	currentLine.setMaxWidth(Double.MAX_VALUE);
+	    	rightBar.getChildren().add(currentLine);
+	    }
+	    
+	    mainLayout.setRight(scrollHistory);
 	    
 	    GridPane centerGrid = new GridPane();
 	    centerGrid.setHgap(20);
@@ -490,8 +506,9 @@ public class App extends Application{
 	    	}
 		    
 	    });
-	    
-	    layout.getChildren().addAll(title, statusLabel, amountField, confirmBtn);
+	    Button backBtn = new Button("Return to Dashboard");
+	    backBtn.setOnAction(e -> showDashboard());
+	    layout.getChildren().addAll(title, statusLabel, amountField, confirmBtn, backBtn);
 	    return layout;
 	}
 	
@@ -533,8 +550,9 @@ public class App extends Application{
 	    	}
 		    
 	    });
-	    
-	    layout.getChildren().addAll(title, statusLabel, amountField, confirmBtn);
+	    Button backBtn = new Button("Return to Dashboard");
+	    backBtn.setOnAction(e -> showDashboard());
+	    layout.getChildren().addAll(title, statusLabel, amountField, confirmBtn, backBtn);
 	    return layout;
 	}
 	
@@ -607,8 +625,9 @@ public class App extends Application{
 	    	}
 		    
 	    });
-	    
-	    layout.getChildren().addAll(title, statusLabel, recipiantLabel, recipiantField, amountField, confirmBtn);
+	    Button backBtn = new Button("Return to Dashboard");
+	    backBtn.setOnAction(e -> showDashboard());
+	    layout.getChildren().addAll(title, statusLabel, recipiantLabel, recipiantField, amountField, confirmBtn, backBtn);
 	    return layout;
 	}
 	
@@ -642,8 +661,9 @@ public class App extends Application{
 	    	mainLayout.setCenter(pinConfirmation("pin"));
 	    });
 	    pinSetting.getChildren().addAll(pinLabel, resetPin);
-	    
-	    layout.getChildren().addAll(title, nameSetting, pinSetting);
+	    Button backBtn = new Button("Return to Dashboard");
+	    backBtn.setOnAction(e -> showDashboard());
+	    layout.getChildren().addAll(title, nameSetting, pinSetting, backBtn);
 	    return layout;
 	}
 	
