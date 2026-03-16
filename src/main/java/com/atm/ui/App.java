@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
@@ -22,6 +23,7 @@ public class App extends Application{
 	private int screenHeight = 700;
 	private int smallscreenWidth = 300;
 	private int smallscreenHeight = 400;
+	private PieChart pieChart = new PieChart();
 	Bank myBank = new Bank();
 	FileHandler fh = new FileHandler();
 	@Override
@@ -276,7 +278,7 @@ public class App extends Application{
 	    rightBar.getChildren().add(new Label("Account Summary"));
 	    
 	    List<String> history = currentAccount.getTransactionHistory();
-	    for(int i = history.size() - 1; i > 0; i--) {
+	    for(int i = history.size() - 1; i >= 0; i--) {
 	    	String line = history.get(i);
 	    	Label currentLine = new Label(line);
 	    	currentLine.setStyle("-fx-background-color: white; -fx-padding: 10; "
@@ -287,16 +289,15 @@ public class App extends Application{
 	    
 	    mainLayout.setRight(scrollHistory);
 	    
+	    
 	    GridPane centerGrid = new GridPane();
 	    centerGrid.setHgap(20);
 	    centerGrid.setPadding(new Insets(20));
 	    centerGrid.setAlignment(Pos.CENTER);
 	    
-	    VBox gainChart = new VBox(new Label("Money Gain Chart Placeholder"));
-	    VBox goneChart = new VBox(new Label("Money Gone Chart Placeholder"));
+	    centerGrid.add(pieChart, 0, 0);
+	    calculateCashFlow();
 	    
-	    centerGrid.add(gainChart, 0, 0);
-	    centerGrid.add(goneChart, 1, 0);
 	    mainLayout.setCenter(centerGrid);
 	    
 	    Scene dashBoardScene = new Scene(mainLayout, screenWidth, screenHeight);
@@ -304,6 +305,72 @@ public class App extends Application{
 	    window.show();
 	    window.centerOnScreen();
 	}
+	private void calculateCashFlow() {
+		Double totalWithdraw = 0.0;
+		Double totalDeposit = 0.0;
+		Double totalReceived = 0.0;
+		Double totalTransfer = 0.0;
+		Double amount = 0.0;
+		String amountStr;
+		List<String> history = currentAccount.getTransactionHistory();
+		for(int i = history.size() - 1; i >= 0; i--) {
+			String line = history.get(i);
+			if(line.contains("withdraw")) {
+				amountStr = line.replace("withdraw $", "");
+				amount = Double.parseDouble(amountStr);
+				totalWithdraw += amount;
+			}
+			else if(line.contains("deposit")) {
+				amountStr = line.replace("deposit $", "");
+				amount = Double.parseDouble(amountStr);
+				totalDeposit += amount;
+			}
+			else if(line.contains("transfer")) {
+				int start = line.indexOf("$") + 1;
+				int end = line.indexOf(" ", start);
+				amountStr = line.substring(start, end);
+				amount = Double.parseDouble(amountStr);
+				totalTransfer += amount;
+			}
+			else if(line.contains("receieve")) {
+				amountStr = line.replace("receieve $", "");
+				amount = Double.parseDouble(amountStr);
+				totalReceived += amount;
+			}
+		}
+		updateDashboardChart(totalWithdraw, totalDeposit, totalTransfer, totalReceived);
+	}
+	private void updateDashboardChart(Double withdraw, Double deposit, Double transfer, Double receive) {
+		Double totalIn = deposit + receive;
+		Double totalOut = withdraw + transfer;
+		
+		PieChart.Data inSlice = new PieChart.Data("Money in", totalIn);
+		PieChart.Data outSlice = new PieChart.Data("Money out", totalOut);
+		
+		pieChart.getData().clear();
+	    pieChart.getData().addAll(inSlice, outSlice);
+	    
+	    setupToolTips(withdraw, deposit, transfer, receive, inSlice, outSlice);
+	}
+	private void setupToolTips(Double withdraw, Double deposit, Double transfer, Double receive, PieChart.Data inSlice, PieChart.Data outSlice) {
+		String inInfo = String.format("Deposits: $%.2f\nReceived: $%.2f", deposit, receive);
+	    applyToolTip(inSlice, inInfo);
+
+	    String outInfo = String.format("Withdrawals: $%.2f\nTransfers: $%.2f", withdraw, transfer);
+	    applyToolTip(outSlice, outInfo);
+	}
+	private void applyToolTip(PieChart.Data data, String message) {
+		Node node = data.getNode();
+	    Tooltip tt = new Tooltip(message);
+	   
+	    tt.setShowDelay(javafx.util.Duration.ZERO);
+	    
+	    Tooltip.install(node, tt);
+
+	    node.setOnMouseEntered(e -> node.setOpacity(0.8));
+	    node.setOnMouseExited(e -> node.setOpacity(1.0));
+	}
+
 	
 	private void executeTransaction(String TransactionType, Double amount) {
 		if (TransactionType.equals("Withdraw")) {
@@ -479,7 +546,7 @@ public class App extends Application{
 	    Button confirmBtn = new Button("Confirm Withdrawal");
 	    confirmBtn.setOnAction(e -> {
 	    	String stringAmount = amountField.getText().trim();
-
+	    	
 	    	if(stringAmount.isEmpty()) {
 		    	statusLabel.setText("Error: Please enter a valid number.");
 	            statusLabel.setStyle("-fx-text-fill: red;");
@@ -762,6 +829,7 @@ public class App extends Application{
 	    layout.getChildren().addAll(statusLabel, titleLabel, newPinField, confirm);
 		return layout;
 	}
+	
 	private Node confirmPinView(String pin) {
 		VBox layout = new VBox(20);
 		layout.setPadding(new Insets(50));
