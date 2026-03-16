@@ -58,6 +58,15 @@ public class Account {
 			return false;
 		}
 	}
+	public boolean withdraw(double amount, String t) {
+		if(amount > 0 && amount <= this.balance) {
+			this.balance -= amount;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 	
 	public boolean deposit(double amount) {
 		if(amount > 0) {
@@ -70,9 +79,20 @@ public class Account {
 		}
 	}
 	
+	public boolean deposit(double amount, String t) {
+		if(amount > 0) {
+			this.balance += amount;
+			this.transactionHistory.add("receieve $" + amount);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 	public boolean transfer(Account receiver, double amount) {
-		if(this.withdraw(amount)) {
-			receiver.deposit(amount);
+		if(this.withdraw(amount, "t")) {
+			receiver.deposit(amount, "t");
 			this.transactionHistory.add("transfer $" + amount + " to account id: " + receiver.getID());
 			return true;
 		}

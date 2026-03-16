@@ -6,6 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import com.atm.logic.*;
@@ -48,6 +49,12 @@ public class App extends Application{
 		PasswordField pinField = new PasswordField();
 		Label statusLabel = new Label("Welcome to ATM");
 		
+		idField.setOnKeyPressed(event -> {
+			if(event.getCode().equals(KeyCode.ENTER)) {
+				pinField.requestFocus();
+			}
+		});
+		
 		Button loginbtn = new Button("Login");
 		loginbtn.setOnAction(e -> {
 			Account acc = myBank.loginCheck(idField.getText(), pinField.getText());
@@ -89,6 +96,18 @@ public class App extends Application{
 	    Label startDeposit = new Label("Initial Deposit:");
 	    TextField depositField = new TextField();
 	    
+	    nameField.setOnKeyPressed(event -> {
+	    	if(event.getCode().equals(KeyCode.ENTER)) {
+	    		pinField.requestFocus();
+	    	}
+	    });
+	    
+	    pinField.setOnKeyPressed(event -> {
+	    	if(event.getCode().equals(KeyCode.ENTER)) {
+	    		depositField.requestFocus();
+	    	}
+	    });
+	    
 	    Button createAcc = new Button("Create Account");
 	    createAcc.setOnAction(e -> {
 	    	String name = nameField.getText().trim();
@@ -118,7 +137,7 @@ public class App extends Application{
 	    	        return; 
 	    	    }
 	    	}
-
+	    	
 	    	Account acc = new Account(pinText, initDepo);
 	    	acc.setName(name);
     		myBank.addAccount(acc);
@@ -229,6 +248,9 @@ public class App extends Application{
 	    depositBtn.setOnAction(e -> {
 	    	mainLayout.setCenter(depositView());
 	    });
+	    transferBtn.setOnAction(e -> {
+	    	mainLayout.setCenter(transferView());
+	    });
 	    
 	    mainLayout.setLeft(leftBar);
 
@@ -265,8 +287,12 @@ public class App extends Application{
 		else if (TransactionType.equals("Deposit")) {
 			this.currentAccount.deposit(amount);
 	    }
-		else if (TransactionType.equals("Transfer")) {
-			
+		fh.saveAccounts(myBank.getAllAccounts());
+	}
+
+	private void executeTransaction(String TransactionType, Account receiver, Double amount) {
+		if (TransactionType.equals("Transfer") && receiver != null) {
+			this.currentAccount.transfer(receiver, amount);
 		}
 		fh.saveAccounts(myBank.getAllAccounts());
 	}
@@ -305,6 +331,44 @@ public class App extends Application{
 	    layout.getChildren().addAll(statusLabel, header, subHeader, pinField, confirmBtn);
 	    return layout;
 	}
+	
+	private Node pinConfirmation(String TransactionType, String targetID, Double amount) {
+		Account receiver = myBank.getAccountId(targetID);
+		VBox layout = new VBox(15);
+	    layout.setAlignment(Pos.CENTER);
+	    Label statusLabel = new Label("");
+	    Label header = new Label("Input PIN to proceed");
+	    header.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 22px; "
+	    		+ "-fx-font-weight: bold;");
+	    
+	    Label subHeader = new Label(TransactionType + " $" + amount + "?");
+	    subHeader.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 14px; "
+	    		+ "-fx-font-weight: bold;");
+
+	    PasswordField pinField = new PasswordField();
+	    pinField.setMaxWidth(200);
+
+	    Button confirmBtn = new Button("Authorize");
+	    confirmBtn.setStyle("-fx-background-color: #00A950; "
+	    		+ "-fx-text-fill: white;");
+
+	    confirmBtn.setOnAction(e -> {
+	        if(currentAccount != null && currentAccount.validatePin(pinField.getText())) {
+	        	executeTransaction(TransactionType, receiver, amount);
+	        	showDashboard();
+	        }
+	        else {
+	        	statusLabel.setText("Invalid PIN!");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	        }
+	    });
+
+	    layout.getChildren().addAll(statusLabel, header, subHeader, pinField, confirmBtn);
+	    return layout;
+	}
+	
 	private Node balanceView() {
 		VBox layout = new VBox(20);
 	    layout.setPadding(new Insets(50));
@@ -434,7 +498,77 @@ public class App extends Application{
 	    return layout;
 	}
 	
-//	private Node transferView() {
-//		//TODO
-//	}
+	private Node transferView() {
+		VBox layout = new VBox(20);
+	    layout.setPadding(new Insets(30));
+	    
+	    Label statusLabel = new Label("");
+	    Label title = new Label("Transfer Cash");
+	    title.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 24px;");
+	    
+	    TextField amountField = new TextField();
+	    amountField.setPromptText("Enter amount...");
+	    
+	    Label recipiantLabel = new Label("Recipiant's ID");
+	    TextField recipiantField = new TextField();
+	    recipiantField.setPromptText("Enter recipiant's ID");
+	    
+	    Button confirmBtn = new Button("Confirm Transfer");
+	    confirmBtn.setOnAction(e -> {
+	    	String stringAmount = amountField.getText().trim();
+	    	String targetID = recipiantField.getText().trim();
+	    	Account recipiant = myBank.getAccountId(targetID);
+	    	if(recipiant == null) {
+	    		statusLabel.setText("Error: Account not found with this id.");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+	    	}
+	    	if(!recipiant.getID().equals(targetID)) {
+	    		statusLabel.setText("Error: Account not found with this id.");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+	    	}
+	    	if(recipiant.equals(currentAccount)) {
+	    		statusLabel.setText("Error: Cannot transfer money to yourself.");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+	    	}
+	    	
+	    	if(targetID.isEmpty()){
+	    		statusLabel.setText("Error: Please enter a valid id.");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+	    	}
+	    	
+	    	if(stringAmount.isEmpty()) {
+		    	statusLabel.setText("Error: Please enter a valid number.");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+	    	}
+            try {
+	    		Double amount = Double.parseDouble(stringAmount);
+	    		if(amount <= 0) {
+	    			statusLabel.setText("Error: Amount must be greater than 0.");
+	                statusLabel.setStyle("-fx-text-fill: red;");
+	                return;
+	    		}
+	    		if (amount > currentAccount.getBalance()) {
+	                statusLabel.setText("Error: Insufficient funds.");
+	                statusLabel.setStyle("-fx-text-fill: red;");
+	                return;
+	            }
+	    		mainLayout.setCenter(pinConfirmation("Transfer", targetID, amount));
+	    	}
+	    	
+	    	catch(NumberFormatException ex) {
+	    		statusLabel.setText("Error: Please enter a valid number.");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	    	}
+		    
+	    });
+	    
+	    layout.getChildren().addAll(title, statusLabel, recipiantLabel, recipiantField, amountField, confirmBtn);
+	    return layout;
+	}
 }
