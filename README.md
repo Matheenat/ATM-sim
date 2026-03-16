@@ -7,7 +7,7 @@ The project hopefully will teach me a lot of stuff especially OOP writing.
 ------------------------------------
 TODO
 ------------------------------------
-        -Graph function in mainLayout.Center
+        -Nothing left to do
 ------------------------------------
 CHANGELOG
 ------------------------------------
@@ -24,3 +24,6 @@ CHANGELOG
         -fixed activity message
         -Working settings (Can change name and pin)
         -Recent activities
+3/17/26
+
+        -Implement pie chart
