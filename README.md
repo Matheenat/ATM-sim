@@ -7,8 +7,6 @@ The project hopefully will teach me a lot of stuff especially OOP writing.
 ------------------------------------
 TODO
 ------------------------------------
-
-        -Recent activity (right bar)
         -Graph function in mainLayout.Center
 ------------------------------------
 CHANGELOG
@@ -25,3 +23,4 @@ CHANGELOG
         -Implement transfer system
         -fixed activity message
         -Working settings (Can change name and pin)
+        -Recent activities
