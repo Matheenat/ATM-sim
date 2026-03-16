@@ -27,7 +27,8 @@ public abstract class TransactionBaseView extends BaseView {
         layout.setAlignment(Pos.CENTER);
 
         titleLabel = new Label(titleText);
-        titleLabel.setStyle("-fx-font-family: 'Inter'; -fx-font-size: 24px;");
+        titleLabel.setStyle("-fx-font-family: 'Inter'; "
+        		+ "-fx-font-size: 24px;");
 
         statusLabel = new Label("");
         
@@ -36,7 +37,8 @@ public abstract class TransactionBaseView extends BaseView {
         amountField.setMaxWidth(300);
 
         confirmBtn = new Button(buttonText);
-        confirmBtn.setStyle("-fx-background-color: #00A950; -fx-text-fill: white;");
+        confirmBtn.setStyle("-fx-background-color: #00A950; "
+        		+ "-fx-text-fill: white;");
 
         backBtn = new Button("Return to Dashboard");
         backBtn.setOnAction(e -> app.showDashboard());

@@ -18,13 +18,18 @@ public class PinConfirmationView extends BaseView {
         layout.setAlignment(Pos.CENTER);
         
         Label header = new Label("Input PIN to proceed");
-        header.setStyle("-fx-font-family: 'Inter'; -fx-font-size: 22px; -fx-font-weight: bold;");
+        header.setStyle("-fx-font-family: 'Inter'; "
+        		+ "-fx-font-size: 22px; "
+        		+ "-fx-font-weight: bold;");
         
         layout.getChildren().add(header);
 
         if (subHeaderText != null) {
             Label subHeader = new Label(subHeaderText);
-            subHeader.setStyle("-fx-font-family: 'Inter'; -fx-font-size: 14px; -fx-font-weight: bold;");
+            subHeader.setStyle("-fx-font-family: 'Inter'; "
+            		+ "-fx-font-size: 14px; "
+            		+ "-fx-font-weight: bold;");
+            
             layout.getChildren().add(subHeader);
         }
 
@@ -41,7 +46,8 @@ public class PinConfirmationView extends BaseView {
         PasswordField pinField = new PasswordField();
         pinField.setMaxWidth(200);
         Button confirmBtn = new Button("Authorize");
-        confirmBtn.setStyle("-fx-background-color: #00A950; -fx-text-fill: white;");
+        confirmBtn.setStyle("-fx-background-color: #00A950; "
+        		+ "-fx-text-fill: white;");
 
         confirmBtn.setOnAction(e -> {
             if (app.getCurrentAccount() != null && app.getCurrentAccount().validatePin(pinField.getText())) {
