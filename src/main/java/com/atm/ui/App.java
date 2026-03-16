@@ -82,6 +82,8 @@ public class App extends Application{
 		grid.setHgap(10);
 	    grid.setVgap(10);
 	    Label statusLabel = new Label("");
+	    Label nameLabel = new Label("Input name");
+	    TextField nameField = new TextField();
 	    Label pinLabel = new Label("Create Pin:");
 		PasswordField pinField = new PasswordField();
 	    Label startDeposit = new Label("Initial Deposit:");
@@ -89,6 +91,7 @@ public class App extends Application{
 	    
 	    Button createAcc = new Button("Create Account");
 	    createAcc.setOnAction(e -> {
+	    	String name = nameField.getText().trim();
 	    	String pinText = pinField.getText().trim();
 	    	if(pinText.isEmpty()) {
 	    		statusLabel.setText("Error: PIN cannot be empty!");
@@ -117,17 +120,20 @@ public class App extends Application{
 	    	}
 
 	    	Account acc = new Account(pinText, initDepo);
+	    	acc.setName(name);
     		myBank.addAccount(acc);
     		fh.saveAccounts(myBank.getAllAccounts());
     		showSuccess(acc.getID());
 	    	
 	    });
 	    grid.add(statusLabel, 0, 0);
-	    grid.add(pinLabel, 0, 1);
-	    grid.add(pinField, 0, 2);
-	    grid.add(startDeposit, 0, 3);
-	    grid.add(depositField, 0, 4);
-	    grid.add(createAcc, 0, 5);
+	    grid.add(nameLabel, 0, 1);
+	    grid.add(nameField, 0, 2);
+	    grid.add(pinLabel, 0, 3);
+	    grid.add(pinField, 0, 4);
+	    grid.add(startDeposit, 0, 5);
+	    grid.add(depositField, 0, 6);
+	    grid.add(createAcc, 0, 7);
 	    Scene signupScene = new Scene(grid, smallscreenWidth, smallscreenHeight);
 	    window.setScene(signupScene);
 	    window.show();
@@ -158,16 +164,17 @@ public class App extends Application{
 	    this.mainLayout = new BorderPane();
 	    HBox headBar = new HBox();
 	    headBar.setPadding(new Insets(10));
-	    headBar.setStyle("-fx-background-color: #81A6C6;"
+	    headBar.setStyle("-fx-background-color: #81A6C6; "
 	    		+ "-fx-border-color: #81A6C6; "
 	    		+ "-fx-border-width: 0 0 1 0;");
 	    
 	    Label atmTitleLabel = new Label("ATM Simulator");
-	    atmTitleLabel.setStyle("-fx-font-family: 'Roboto';"
+	    atmTitleLabel.setStyle("-fx-font-family: 'Roboto'; "
 	    		+ "-fx-font-weight: bold;"
 	    		+ "-fx-font-size: 40px;");
 	    headBar.getChildren().add(atmTitleLabel);
 	    mainLayout.setTop(headBar);
+	    
 	    
 	    VBox leftBar = new VBox(20);
 	    leftBar.setPadding(new Insets(10));
@@ -175,6 +182,21 @@ public class App extends Application{
 	    leftBar.setStyle("-fx-background-color: #AACDDC; "
 	    		+ "-fx-border-color: #AACDDC; "
 	    		+ "-fx-border-width: 0 1 0 0;");
+	    
+	    VBox welcomeGroup = new VBox(2);
+	    Label welcomeLabel = new Label("Welcome back!");
+	    welcomeLabel.setStyle("-fx-font-family: 'Roboto'; "
+	    		+ "-fx-font-color: black; "
+	    		+ "-fx-font-size: 34px");
+	    
+	    Label userLabel = new Label(currentAccount.getName());
+	    userLabel.setStyle("-fx-font-family: 'Roboto'; "
+	    		+ "-fx-font-color: black; "
+	    		+ "-fx-font-size: 23px");
+	    userLabel.setMaxWidth(300);
+	    userLabel.setEllipsisString("...");
+	    userLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
+	    welcomeGroup.getChildren().addAll(welcomeLabel, userLabel);
 	    
 	    Button checkBalanceBtn = new Button("Balance");
 	    Button withdrawBtn = new Button("Withdraw");
@@ -197,7 +219,7 @@ public class App extends Application{
 	    transferBtn.setStyle(buttonStyle);
 	    settingsBtn.setStyle(buttonStyle);
 
-	    leftBar.getChildren().addAll(checkBalanceBtn, withdrawBtn, depositBtn, transferBtn, settingsBtn);
+	    leftBar.getChildren().addAll(welcomeGroup, checkBalanceBtn, withdrawBtn, depositBtn, transferBtn, settingsBtn);
 	    checkBalanceBtn.setOnAction(e -> {
 	    	mainLayout.setCenter(balanceView());
 	    });
@@ -410,4 +432,8 @@ public class App extends Application{
 	    layout.getChildren().addAll(title, statusLabel, amountField, confirmBtn);
 	    return layout;
 	}
+	
+//	private Node transferView() {
+//		//TODO
+//	}
 }

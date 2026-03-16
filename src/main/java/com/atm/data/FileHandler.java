@@ -12,7 +12,8 @@ public class FileHandler {
                 StringBuilder line = new StringBuilder();
                 line.append(acc.getID()).append(",")
                 .append(acc.getPin()).append(",")
-                .append(acc.getBalance());
+                .append(acc.getBalance()).append(",")
+                .append(acc.getName());
                 
                 for (String record : acc.getTransactionHistory()) {
                     line.append(",").append(record);
@@ -38,11 +39,13 @@ public class FileHandler {
                 String id = parts[0];
                 String pin = parts[1];
                 double balance = Double.parseDouble(parts[2]);
+                String name = parts[3];
 
                 Account acc = new Account(pin, balance);
                 acc.setID(id);
+                acc.setName(name);
                 
-                for (int i = 3; i < parts.length; i++) {
+                for (int i = 4; i < parts.length; i++) {
                     acc.addHistoryRecord(parts[i]); 
                 }
                 

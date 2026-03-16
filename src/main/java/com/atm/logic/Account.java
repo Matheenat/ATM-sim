@@ -7,11 +7,19 @@ public class Account {
 	private String id;
 	private String pin;
 	private double balance;
+	private String name;
 	private List<String> transactionHistory = new ArrayList<>();
 	
 	public Account(String pin, double balance) {
 		this.pin = pin;
 		this.balance = Math.max(0, balance);
+		this.name = "New user";
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getName() {
+		return this.name;
 	}
 	public void setID(String id) {
 		this.id = id;
