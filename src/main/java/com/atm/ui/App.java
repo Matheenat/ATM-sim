@@ -8,7 +8,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import com.atm.logic.*;
@@ -24,8 +23,16 @@ public class App extends Application{
 	private int smallscreenWidth = 300;
 	private int smallscreenHeight = 400;
 	private PieChart pieChart = new PieChart();
-	Bank myBank = new Bank();
+	
+	private Bank myBank = new Bank();
+	public Bank getBank() {return myBank;}
 	FileHandler fh = new FileHandler();
+	public void setCurrentAccount(Account currentAccount) {
+		this.currentAccount = currentAccount;
+	}
+	public Account getCurrentAccount() {
+		return this.currentAccount;
+	}
 	@Override
     public void start(Stage primaryStage) {
 		FontsLoader.loadFonts();
@@ -41,127 +48,15 @@ public class App extends Application{
     }
 	
 	public void showLogin() {
-		GridPane grid = new GridPane();
-		grid.setAlignment(Pos.CENTER);
-		grid.setHgap(10);
-	    grid.setVgap(10);
-		
-		Label idLabel = new Label("Account ID:");
-		TextField idField = new TextField();
-		Label pinLabel = new Label("Pin:");
-		PasswordField pinField = new PasswordField();
-		Label statusLabel = new Label("Welcome to ATM");
-		
-		idField.setOnKeyPressed(event -> {
-			if(event.getCode().equals(KeyCode.ENTER)) {
-				pinField.requestFocus();
-			}
-		});
-		
-		Button loginbtn = new Button("Login");
-		loginbtn.setOnAction(e -> {
-			Account acc = myBank.loginCheck(idField.getText(), pinField.getText());
-			if (acc != null) {
-				this.currentAccount = acc;
-				showDashboard();
-				
-		    } 
-			else {
-		        statusLabel.setText("Access Denied: Invalid ID or PIN.");
-		        statusLabel.setStyle("-fx-text-fill: red;");
-		}});
-		
-		Button signupbtn = new Button("Signup");
-		signupbtn.setOnAction(e -> showSignup());
-		
-		grid.add(statusLabel, 0, 0);
-		grid.add(idLabel, 0, 1);
-		grid.add(idField, 0, 2);
-		grid.add(pinLabel, 0, 3);
-		grid.add(pinField, 0, 4);
-		grid.add(loginbtn, 0, 5);
-		grid.add(signupbtn, 0, 6);
-		Scene loginScene = new Scene(grid, smallscreenWidth, smallscreenHeight);
+		LoginView loginview = new LoginView(this);
+		Scene loginScene = new Scene(loginview.getRoot(), smallscreenWidth, smallscreenHeight);
 	    window.setScene(loginScene);
 	    window.show();
 	}
 	
 	public void showSignup() {
-		GridPane grid = new GridPane();
-		grid.setAlignment(Pos.CENTER);
-		grid.setHgap(10);
-	    grid.setVgap(10);
-	    Label statusLabel = new Label("");
-	    Label nameLabel = new Label("Input name");
-	    TextField nameField = new TextField();
-	    Label pinLabel = new Label("Create Pin:");
-		PasswordField pinField = new PasswordField();
-	    Label startDeposit = new Label("Initial Deposit:");
-	    TextField depositField = new TextField();
-	    
-	    nameField.setOnKeyPressed(event -> {
-	    	if(event.getCode().equals(KeyCode.ENTER)) {
-	    		pinField.requestFocus();
-	    	}
-	    });
-	    
-	    pinField.setOnKeyPressed(event -> {
-	    	if(event.getCode().equals(KeyCode.ENTER)) {
-	    		depositField.requestFocus();
-	    	}
-	    });
-	    
-	    Button createAcc = new Button("Create Account");
-	    createAcc.setOnAction(e -> {
-	    	String name = nameField.getText().trim();
-	    	if(name.length() > 20) {
-	    		statusLabel.setText("Error: Name cannot be longer than 20 characters");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	            return;
-	    	}
-	    	String pinText = pinField.getText().trim();
-	    	if(pinText.isEmpty()) {
-	    		statusLabel.setText("Error: PIN cannot be empty!");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	            return;
-	    	}
-	    	if(pinText.length() < 6) {
-	    		statusLabel.setText("Error: PIN must be atleast 6 characters!");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	            return;
-	    	}
-	    	Double initDepo;
-	    	String depoText = depositField.getText().trim();
-	    	if(depoText.isEmpty()) {
-	    		initDepo = 0.0;
-	    	}
-	    	else {
-	    		try{
-	    			initDepo = Double.parseDouble(depoText);
-	    		}
-	    		catch(NumberFormatException ex) {
-	    			statusLabel.setText("Error: Deposit must be a number!");
-	    	        statusLabel.setStyle("-fx-text-fill: red;");
-	    	        return; 
-	    	    }
-	    	}
-	    	
-	    	Account acc = new Account(pinText, initDepo);
-	    	acc.setName(name);
-    		myBank.addAccount(acc);
-    		fh.saveAccounts(myBank.getAllAccounts());
-    		showSuccess(acc.getID());
-	    	
-	    });
-	    grid.add(statusLabel, 0, 0);
-	    grid.add(nameLabel, 0, 1);
-	    grid.add(nameField, 0, 2);
-	    grid.add(pinLabel, 0, 3);
-	    grid.add(pinField, 0, 4);
-	    grid.add(startDeposit, 0, 5);
-	    grid.add(depositField, 0, 6);
-	    grid.add(createAcc, 0, 7);
-	    Scene signupScene = new Scene(grid, smallscreenWidth, smallscreenHeight);
+		SignupView signupview = new SignupView(this);
+	    Scene signupScene = new Scene(signupview.getRoot(), smallscreenWidth, smallscreenHeight);
 	    window.setScene(signupScene);
 	    window.show();
 	}
