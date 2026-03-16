@@ -9,7 +9,6 @@ TODO
 ------------------------------------
 
         -Recent activity (right bar)
-        -Settings (Changing PIN & Name)
         -Graph function in mainLayout.Center
 ------------------------------------
 CHANGELOG
@@ -25,3 +24,4 @@ CHANGELOG
 
         -Implement transfer system
         -fixed activity message
+        -Working settings (Can change name and pin)
