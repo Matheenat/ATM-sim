@@ -5,6 +5,14 @@ The theme that I picked is a Bank service system, though I do not have time to i
 The project hopefully will teach me a lot of stuff especially OOP writing.
 
 ------------------------------------
+TODO
+------------------------------------
+
+        -The Transfer Feature
+        -Recent activity (right bar)
+        -Settings (Changing PIN & Name)
+        -Graph function in mainLayout.Center
+------------------------------------
 CHANGELOG
 ------------------------------------
 3/15/26 
