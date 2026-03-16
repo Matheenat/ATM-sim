@@ -31,6 +31,9 @@ public class Account {
 	public String getPin() {
 		return this.pin;
 	}
+	public void setPin(String pin) {
+		this.pin = pin;
+	}
 	
 	public double getBalance() {
 		return this.balance;

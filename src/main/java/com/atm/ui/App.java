@@ -397,7 +397,7 @@ public class App extends Application{
 
 	    confirmBtn.setOnAction(e -> {
 	        if(currentAccount != null && currentAccount.validatePin(pinField.getText())) {
-	        	resetManagerView("name");
+	        	resetManagerView(scene);
 	        }
 	        else {
 	        	statusLabel.setText("Invalid PIN!");
@@ -614,7 +614,8 @@ public class App extends Application{
 	
 	private Node settingsView() {
 		VBox layout = new VBox(20);
-		HBox settings = new HBox(20);
+		HBox nameSetting = new HBox(20);
+		HBox pinSetting = new HBox(20);
 	    layout.setPadding(new Insets(30));
 	    
 	    Label title = new Label("Settings");
@@ -630,16 +631,28 @@ public class App extends Application{
 	    resetName.setOnAction(e -> {
 	    	mainLayout.setCenter(pinConfirmation("name"));
 	    });
+	    nameSetting.getChildren().addAll(nameLabel, resetName);
 	    
-	    settings.getChildren().addAll(nameLabel, resetName);
+	    Label pinLabel = new Label("Pin: **********");
+	    pinLabel.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-weight: bold;"
+	    		+ "-fx-font-size: 24px;");
+	    Button resetPin = new Button("Reset Pin");
+	    resetPin.setOnAction(e -> {
+	    	mainLayout.setCenter(pinConfirmation("pin"));
+	    });
+	    pinSetting.getChildren().addAll(pinLabel, resetPin);
 	    
-	    layout.getChildren().addAll(title, settings);
+	    layout.getChildren().addAll(title, nameSetting, pinSetting);
 	    return layout;
 	}
 	
 	private void resetManagerView(String scene) {
 		if(scene.equals("name")) {
 			mainLayout.setCenter(resetNameView());
+		}
+		if(scene.equals("pin")) {
+			mainLayout.setCenter(resetPinView());
 		}
 	}
 	private Node resetNameView() {
@@ -682,9 +695,100 @@ public class App extends Application{
 			currentAccount.setName(newName);
 			fh.saveAccounts(myBank.getAllAccounts());
 			showDashboard();
-			
 		});
 	    layout.getChildren().addAll(statusLabel, titleLabel, newNameField, confirm);
+		return layout;
+	}
+	
+	private Node resetPinView() {
+		VBox layout = new VBox(20);
+		layout.setPadding(new Insets(50));
+		layout.setAlignment(Pos.CENTER);
+		
+		layout.setStyle("-fx-background-color: #FFFFFF; "
+	    		+ "-fx-background-radius: 20; "
+	    		+ "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 10);");
+	    layout.setMaxSize(500, 300);
+	    
+	    Label statusLabel = new Label("");
+	    Label titleLabel = new Label("Input new pin");
+	    titleLabel.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 18px; "
+	    		+ "-fx-text-fill: #555555;");
+	    
+		PasswordField newPinField = new PasswordField();
+		newPinField.setPromptText("Input new pin...");
+		
+		Button confirm = new Button("Confirm");
+		confirm.setOnAction(e -> {
+			String newPin = newPinField.getText().trim();
+			if(newPin.isEmpty()) {
+				statusLabel.setText("Error: Your new pin cannot be empty");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+			}
+			if(newPin.equals(currentAccount.getPin())){
+				statusLabel.setText("Error: Your new pin cannot be same as the current one");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+			}
+			if(newPin.length() < 6) {
+				statusLabel.setText("Error: Your new pin must be atleast 6 characters");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+			}
+			mainLayout.setCenter(confirmPinView(newPin));
+		});
+	    layout.getChildren().addAll(statusLabel, titleLabel, newPinField, confirm);
+		return layout;
+	}
+	private Node confirmPinView(String pin) {
+		VBox layout = new VBox(20);
+		layout.setPadding(new Insets(50));
+		layout.setAlignment(Pos.CENTER);
+		
+		layout.setStyle("-fx-background-color: #FFFFFF; "
+	    		+ "-fx-background-radius: 20; "
+	    		+ "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 10);");
+	    layout.setMaxSize(500, 300);
+	    
+	    Label statusLabel = new Label("");
+	    Label titleLabel = new Label("Confirm your new pin");
+	    titleLabel.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 18px; "
+	    		+ "-fx-text-fill: #555555;");
+	    
+		PasswordField newPinField = new PasswordField();
+		newPinField.setPromptText("Confirm your pin");
+		
+		Button confirm = new Button("Confirm");
+		confirm.setOnAction(e -> {
+			String newPin = newPinField.getText().trim();
+			if(newPin.isEmpty()) {
+				statusLabel.setText("Error: Your new pin cannot be empty");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+			}
+			if(newPin.equals(currentAccount.getPin())){
+				statusLabel.setText("Error: Your new pin cannot be same as the current one");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+			}
+			if(newPin.length() < 6) {
+				statusLabel.setText("Error: Your new pin must be atleast 6 characters");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+			}
+			if(!newPin.equals(pin)) {
+				statusLabel.setText("Error: Please type your new pin again");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+			}
+			currentAccount.setPin(newPin);
+			fh.saveAccounts(myBank.getAllAccounts());
+			showDashboard();
+		});
+	    layout.getChildren().addAll(statusLabel, titleLabel, newPinField, confirm);
 		return layout;
 	}
 }
