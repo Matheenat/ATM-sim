@@ -16,17 +16,30 @@ import com.atm.util.FontsLoader;
 
 public class App extends Application{
 	private Stage window;
-	private BorderPane mainLayout;
 	private Account currentAccount;
 	private int screenWidth = 1000;
 	private int screenHeight = 700;
 	private int smallscreenWidth = 300;
 	private int smallscreenHeight = 400;
-	private PieChart pieChart = new PieChart();
+	private PinConfirmationView pinConfirmationView = new PinConfirmationView(this);
+	public PinConfirmationView getPinView() {
+		return pinConfirmationView;
+	}
 	
+	public TransactionService txService;
+	private PieChart pieChart = new PieChart();
+	private BorderPane mainLayout;
+	public BorderPane getMainLayout() {
+		return this.mainLayout;
+	}
 	private Bank myBank = new Bank();
-	public Bank getBank() {return myBank;}
+	public Bank getBank() {
+		return myBank;
+	}
 	FileHandler fh = new FileHandler();
+	public FileHandler getFH() {
+		return fh;
+	}
 	public void setCurrentAccount(Account currentAccount) {
 		this.currentAccount = currentAccount;
 	}
@@ -44,6 +57,7 @@ public class App extends Application{
 
         primaryStage.setTitle("Atm-Sim");
         primaryStage.setScene(scene);
+        this.txService = new TransactionService(this);
         showLogin();
     }
 	
@@ -62,22 +76,8 @@ public class App extends Application{
 	}
 	
 	public void showSuccess(String id) {
-		GridPane grid = new GridPane();
-		grid.setAlignment(Pos.CENTER);
-		grid.setHgap(10);
-	    grid.setVgap(10);
-	    
-	    Label success = new Label("Account Created successfully!");
-	    success.setStyle("-fx-text-fill: green;");
-	    Label userid = new Label("Your Account id is \"" + id + "\"");
-	    userid.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-	    Button confirm = new Button("Confirm");
-	    confirm.setOnAction(e -> showLogin());
-	    
-	    grid.add(success, 0, 0);
-	    grid.add(userid, 0, 1);
-	    grid.add(confirm, 0, 2);
-	    Scene successScene = new Scene(grid, smallscreenWidth, smallscreenHeight);
+		ShowSuccess showsuccess = new ShowSuccess(this, id);
+	    Scene successScene = new Scene(showsuccess.getRoot(), smallscreenWidth, smallscreenHeight);
 	    window.setScene(successScene);
 	    window.show();
 	}
@@ -146,13 +146,13 @@ public class App extends Application{
 	    	mainLayout.setCenter(balanceView());
 	    });
 	    withdrawBtn.setOnAction(e -> {
-	    	mainLayout.setCenter(withdrawView());
+	    	withdrawView();
 	    });
 	    depositBtn.setOnAction(e -> {
-	    	mainLayout.setCenter(depositView());
+	    	depositView();
 	    });
 	    transferBtn.setOnAction(e -> {
-	    	mainLayout.setCenter(transferView());
+	    	transferView();
 	    });
 	    settingsBtn.setOnAction(e -> {
 	    	mainLayout.setCenter(settingsView());
@@ -201,39 +201,8 @@ public class App extends Application{
 	    window.centerOnScreen();
 	}
 	private void calculateCashFlow() {
-		Double totalWithdraw = 0.0;
-		Double totalDeposit = 0.0;
-		Double totalReceived = 0.0;
-		Double totalTransfer = 0.0;
-		Double amount = 0.0;
-		String amountStr;
-		List<String> history = currentAccount.getTransactionHistory();
-		for(int i = history.size() - 1; i >= 0; i--) {
-			String line = history.get(i);
-			if(line.contains("withdraw")) {
-				amountStr = line.replace("withdraw $", "");
-				amount = Double.parseDouble(amountStr);
-				totalWithdraw += amount;
-			}
-			else if(line.contains("deposit")) {
-				amountStr = line.replace("deposit $", "");
-				amount = Double.parseDouble(amountStr);
-				totalDeposit += amount;
-			}
-			else if(line.contains("transfer")) {
-				int start = line.indexOf("$") + 1;
-				int end = line.indexOf(" ", start);
-				amountStr = line.substring(start, end);
-				amount = Double.parseDouble(amountStr);
-				totalTransfer += amount;
-			}
-			else if(line.contains("receieve")) {
-				amountStr = line.replace("receieve $", "");
-				amount = Double.parseDouble(amountStr);
-				totalReceived += amount;
-			}
-		}
-		updateDashboardChart(totalWithdraw, totalDeposit, totalTransfer, totalReceived);
+		CashFlowData data = new CashFlowData(currentAccount);
+		updateDashboardChart(data.getTotalWithdraw(), data.getTotalDeposit(), data.getTotalTransfer(), data.getTotalReceived());
 	}
 	private void updateDashboardChart(Double withdraw, Double deposit, Double transfer, Double receive) {
 		Double totalIn = deposit + receive;
@@ -266,127 +235,6 @@ public class App extends Application{
 	    node.setOnMouseExited(e -> node.setOpacity(1.0));
 	}
 
-	
-	private void executeTransaction(String TransactionType, Double amount) {
-		if (TransactionType.equals("Withdraw")) {
-	        this.currentAccount.withdraw(amount);
-	    } 
-		else if (TransactionType.equals("Deposit")) {
-			this.currentAccount.deposit(amount);
-	    }
-		fh.saveAccounts(myBank.getAllAccounts());
-	}
-
-	private void executeTransaction(String TransactionType, Account receiver, Double amount) {
-		if (TransactionType.equals("Transfer") && receiver != null) {
-			this.currentAccount.transfer(receiver, amount);
-		}
-		fh.saveAccounts(myBank.getAllAccounts());
-	}
-	
-	private Node pinConfirmation(String Type, Double amount) {
-		VBox layout = new VBox(15);
-	    layout.setAlignment(Pos.CENTER);
-	    Label statusLabel = new Label("");
-	    Label header = new Label("Input PIN to proceed");
-	    header.setStyle("-fx-font-family: 'Inter'; "
-	    		+ "-fx-font-size: 22px; "
-	    		+ "-fx-font-weight: bold;");
-	    
-	    Label subHeader = new Label(Type + " $" + amount + "?");
-	    subHeader.setStyle("-fx-font-family: 'Inter'; "
-	    		+ "-fx-font-size: 14px; "
-	    		+ "-fx-font-weight: bold;");
-
-	    PasswordField pinField = new PasswordField();
-	    pinField.setMaxWidth(200);
-
-	    Button confirmBtn = new Button("Authorize");
-	    confirmBtn.setStyle("-fx-background-color: #00A950; "
-	    		+ "-fx-text-fill: white;");
-
-	    confirmBtn.setOnAction(e -> {
-	        if(currentAccount != null && currentAccount.validatePin(pinField.getText())) {
-	        	executeTransaction(Type, amount);
-	        	showDashboard();
-	        }
-	        else {
-	        	statusLabel.setText("Invalid PIN!");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	        }
-	    });
-
-	    layout.getChildren().addAll(statusLabel, header, subHeader, pinField, confirmBtn);
-	    return layout;
-	}
-	
-	private Node pinConfirmation(String Type, String targetID, Double amount) {
-		Account receiver = myBank.getAccountId(targetID);
-		VBox layout = new VBox(15);
-	    layout.setAlignment(Pos.CENTER);
-	    Label statusLabel = new Label("");
-	    Label header = new Label("Input PIN to proceed");
-	    header.setStyle("-fx-font-family: 'Inter'; "
-	    		+ "-fx-font-size: 22px; "
-	    		+ "-fx-font-weight: bold;");
-	    
-	    Label subHeader = new Label(Type + " $" + amount + "?");
-	    subHeader.setStyle("-fx-font-family: 'Inter'; "
-	    		+ "-fx-font-size: 14px; "
-	    		+ "-fx-font-weight: bold;");
-
-	    PasswordField pinField = new PasswordField();
-	    pinField.setMaxWidth(200);
-
-	    Button confirmBtn = new Button("Authorize");
-	    confirmBtn.setStyle("-fx-background-color: #00A950; "
-	    		+ "-fx-text-fill: white;");
-
-	    confirmBtn.setOnAction(e -> {
-	        if(currentAccount != null && currentAccount.validatePin(pinField.getText())) {
-	        	executeTransaction(Type, receiver, amount);
-	        	showDashboard();
-	        }
-	        else {
-	        	statusLabel.setText("Invalid PIN!");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	        }
-	    });
-
-	    layout.getChildren().addAll(statusLabel, header, subHeader, pinField, confirmBtn);
-	    return layout;
-	}
-	
-	private Node pinConfirmation(String scene) {
-		VBox layout = new VBox(15);
-	    layout.setAlignment(Pos.CENTER);
-	    Label statusLabel = new Label("");
-	    Label header = new Label("Input PIN to proceed");
-	    header.setStyle("-fx-font-family: 'Inter'; "
-	    		+ "-fx-font-size: 22px; "
-	    		+ "-fx-font-weight: bold;");
-
-	    PasswordField pinField = new PasswordField();
-	    pinField.setMaxWidth(200);
-
-	    Button confirmBtn = new Button("Authorize");
-	    confirmBtn.setStyle("-fx-background-color: #00A950; "
-	    		+ "-fx-text-fill: white;");
-
-	    confirmBtn.setOnAction(e -> {
-	        if(currentAccount != null && currentAccount.validatePin(pinField.getText())) {
-	        	resetManagerView(scene);
-	        }
-	        else {
-	        	statusLabel.setText("Invalid PIN!");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	        }
-	    });
-
-	    layout.getChildren().addAll(statusLabel, header, pinField, confirmBtn);
-	    return layout;
-	}
-	
 	private Node balanceView() {
 		VBox layout = new VBox(20);
 	    layout.setPadding(new Insets(50));
@@ -425,172 +273,16 @@ public class App extends Application{
 	    
 	    return layout;
 	}
-	private Node withdrawView() {
-		VBox layout = new VBox(20);
-	    layout.setPadding(new Insets(30));
-	    
-	    Label title = new Label("Withdraw Cash");
-	    title.setStyle("-fx-font-family: 'Inter'; "
-	    		+ "-fx-font-size: 24px;");
-	    
-	    TextField amountField = new TextField();
-	    amountField.setPromptText("Enter amount...");
-	    
-	    Label statusLabel = new Label("");
-	    
-	    Button confirmBtn = new Button("Confirm Withdrawal");
-	    confirmBtn.setOnAction(e -> {
-	    	String stringAmount = amountField.getText().trim();
-	    	
-	    	if(stringAmount.isEmpty()) {
-		    	statusLabel.setText("Error: Please enter a valid number.");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	            return;
-	    	}
-            try {
-	    		Double amount = Double.parseDouble(stringAmount);
-	    		if(amount <= 0) {
-	    			statusLabel.setText("Error: Amount must be greater than 0.");
-	                statusLabel.setStyle("-fx-text-fill: red;");
-	                return;
-	    		}
-	    		if (amount > currentAccount.getBalance()) {
-	                statusLabel.setText("Error: Insufficient funds.");
-	                statusLabel.setStyle("-fx-text-fill: red;");
-	                return;
-	            }
-	    		mainLayout.setCenter(pinConfirmation("Withdraw", amount));
-	    	}
-	    	
-	    	catch(NumberFormatException ex) {
-	    		statusLabel.setText("Error: Please enter a valid number.");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	    	}
-		    
-	    });
-	    Button backBtn = new Button("Return to Dashboard");
-	    backBtn.setOnAction(e -> showDashboard());
-	    layout.getChildren().addAll(title, statusLabel, amountField, confirmBtn, backBtn);
-	    return layout;
+	private void  withdrawView() {
+		mainLayout.setCenter(new WithdrawView(this).getRoot());
 	}
 	
-	private Node depositView() {
-		VBox layout = new VBox(20);
-	    layout.setPadding(new Insets(30));
-	    
-	    Label title = new Label("Deposit Cash");
-	    title.setStyle("-fx-font-family: 'Inter'; "
-	    		+ "-fx-font-size: 24px;");
-	    
-	    TextField amountField = new TextField();
-	    amountField.setPromptText("Enter amount...");
-	    
-	    Label statusLabel = new Label("");
-	    
-	    Button confirmBtn = new Button("Confirm Deposition");
-	    confirmBtn.setOnAction(e -> {
-	    	String stringAmount = amountField.getText().trim();
-
-	    	if(stringAmount.isEmpty()) {
-		    	statusLabel.setText("Error: Please enter a valid number.");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	            return;
-	    	}
-            try {
-	    		Double amount = Double.parseDouble(stringAmount);
-	    		if(amount <= 0) {
-	    			statusLabel.setText("Error: Amount must be greater than 0.");
-	                statusLabel.setStyle("-fx-text-fill: red;");
-	                return;
-	    		}
-	    		mainLayout.setCenter(pinConfirmation("Deposit", amount));
-	    	}
-	    	
-	    	catch(NumberFormatException ex) {
-	    		statusLabel.setText("Error: Please enter a valid number.");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	    	}
-		    
-	    });
-	    Button backBtn = new Button("Return to Dashboard");
-	    backBtn.setOnAction(e -> showDashboard());
-	    layout.getChildren().addAll(title, statusLabel, amountField, confirmBtn, backBtn);
-	    return layout;
+	private void depositView() {
+		mainLayout.setCenter(new DepositView(this).getRoot());
 	}
 	
-	private Node transferView() {
-		VBox layout = new VBox(20);
-	    layout.setPadding(new Insets(30));
-	    
-	    Label statusLabel = new Label("");
-	    Label title = new Label("Transfer Cash");
-	    title.setStyle("-fx-font-family: 'Inter'; "
-	    		+ "-fx-font-size: 24px;");
-	    
-	    TextField amountField = new TextField();
-	    amountField.setPromptText("Enter amount...");
-	    
-	    Label recipiantLabel = new Label("Recipiant's ID");
-	    TextField recipiantField = new TextField();
-	    recipiantField.setPromptText("Enter recipiant's ID");
-	    
-	    Button confirmBtn = new Button("Confirm Transfer");
-	    confirmBtn.setOnAction(e -> {
-	    	String stringAmount = amountField.getText().trim();
-	    	String targetID = recipiantField.getText().trim();
-	    	Account recipiant = myBank.getAccountId(targetID);
-	    	if(recipiant == null) {
-	    		statusLabel.setText("Error: Account not found with this id.");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	            return;
-	    	}
-	    	if(!recipiant.getID().equals(targetID)) {
-	    		statusLabel.setText("Error: Account not found with this id.");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	            return;
-	    	}
-	    	if(recipiant.equals(currentAccount)) {
-	    		statusLabel.setText("Error: Cannot transfer money to yourself.");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	            return;
-	    	}
-	    	
-	    	if(targetID.isEmpty()){
-	    		statusLabel.setText("Error: Please enter a valid id.");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	            return;
-	    	}
-	    	
-	    	if(stringAmount.isEmpty()) {
-		    	statusLabel.setText("Error: Please enter a valid number.");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	            return;
-	    	}
-            try {
-	    		Double amount = Double.parseDouble(stringAmount);
-	    		if(amount <= 0) {
-	    			statusLabel.setText("Error: Amount must be greater than 0.");
-	                statusLabel.setStyle("-fx-text-fill: red;");
-	                return;
-	    		}
-	    		if (amount > currentAccount.getBalance()) {
-	                statusLabel.setText("Error: Insufficient funds.");
-	                statusLabel.setStyle("-fx-text-fill: red;");
-	                return;
-	            }
-	    		mainLayout.setCenter(pinConfirmation("Transfer", targetID, amount));
-	    	}
-	    	
-	    	catch(NumberFormatException ex) {
-	    		statusLabel.setText("Error: Please enter a valid number.");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	    	}
-		    
-	    });
-	    Button backBtn = new Button("Return to Dashboard");
-	    backBtn.setOnAction(e -> showDashboard());
-	    layout.getChildren().addAll(title, statusLabel, recipiantLabel, recipiantField, amountField, confirmBtn, backBtn);
-	    return layout;
+	private void transferView() {
+		mainLayout.setCenter(new TransferView(this).getRoot());
 	}
 	
 	private Node settingsView() {
@@ -610,7 +302,7 @@ public class App extends Application{
 	    		+ "-fx-font-size: 24px;");
 	    Button resetName = new Button("Reset Name");
 	    resetName.setOnAction(e -> {
-	    	mainLayout.setCenter(pinConfirmation("name"));
+	    	mainLayout.setCenter(pinConfirmationView.getResetView("name"));
 	    });
 	    nameSetting.getChildren().addAll(nameLabel, resetName);
 	    
@@ -620,7 +312,7 @@ public class App extends Application{
 	    		+ "-fx-font-size: 24px;");
 	    Button resetPin = new Button("Reset Pin");
 	    resetPin.setOnAction(e -> {
-	    	mainLayout.setCenter(pinConfirmation("pin"));
+	    	mainLayout.setCenter(pinConfirmationView.getResetView("pin"));
 	    });
 	    pinSetting.getChildren().addAll(pinLabel, resetPin);
 	    Button backBtn = new Button("Return to Dashboard");
@@ -629,7 +321,7 @@ public class App extends Application{
 	    return layout;
 	}
 	
-	private void resetManagerView(String scene) {
+	void resetManagerView(String scene) {
 		if(scene.equals("name")) {
 			mainLayout.setCenter(resetNameView());
 		}
