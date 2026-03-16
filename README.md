@@ -8,7 +8,6 @@ The project hopefully will teach me a lot of stuff especially OOP writing.
 TODO
 ------------------------------------
 
-        -The Transfer Feature
         -Recent activity (right bar)
         -Settings (Changing PIN & Name)
         -Graph function in mainLayout.Center
@@ -23,3 +22,6 @@ CHANGELOG
         -Added check Balance button (2 mins of vibe code 💔💔)
 
 3/16/26 
+
+        -Implement transfer system
+        -fixed activity message
