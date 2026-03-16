@@ -17,8 +17,8 @@ public class App extends Application{
 	private Stage window;
 	private BorderPane mainLayout;
 	private Account currentAccount;
-	private int screenWidth = 1408;
-	private int screenHeight = 896;
+	private int screenWidth = 1000;
+	private int screenHeight = 700;
 	private int smallscreenWidth = 300;
 	private int smallscreenHeight = 400;
 	Bank myBank = new Bank();
@@ -111,6 +111,11 @@ public class App extends Application{
 	    Button createAcc = new Button("Create Account");
 	    createAcc.setOnAction(e -> {
 	    	String name = nameField.getText().trim();
+	    	if(name.length() > 20) {
+	    		statusLabel.setText("Error: Name cannot be longer than 20 characters");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+	    	}
 	    	String pinText = pinField.getText().trim();
 	    	if(pinText.isEmpty()) {
 	    		statusLabel.setText("Error: PIN cannot be empty!");
@@ -251,6 +256,9 @@ public class App extends Application{
 	    transferBtn.setOnAction(e -> {
 	    	mainLayout.setCenter(transferView());
 	    });
+	    settingsBtn.setOnAction(e -> {
+	    	mainLayout.setCenter(settingsView());
+	    });
 	    
 	    mainLayout.setLeft(leftBar);
 
@@ -278,6 +286,7 @@ public class App extends Application{
 	    Scene dashBoardScene = new Scene(mainLayout, screenWidth, screenHeight);
 	    window.setScene(dashBoardScene);
 	    window.show();
+	    window.centerOnScreen();
 	}
 	
 	private void executeTransaction(String TransactionType, Double amount) {
@@ -297,7 +306,7 @@ public class App extends Application{
 		fh.saveAccounts(myBank.getAllAccounts());
 	}
 	
-	private Node pinConfirmation(String TransactionType, Double amount) {
+	private Node pinConfirmation(String Type, Double amount) {
 		VBox layout = new VBox(15);
 	    layout.setAlignment(Pos.CENTER);
 	    Label statusLabel = new Label("");
@@ -306,43 +315,7 @@ public class App extends Application{
 	    		+ "-fx-font-size: 22px; "
 	    		+ "-fx-font-weight: bold;");
 	    
-	    Label subHeader = new Label(TransactionType + " $" + amount + "?");
-	    subHeader.setStyle("-fx-font-family: 'Inter'; "
-	    		+ "-fx-font-size: 14px; "
-	    		+ "-fx-font-weight: bold;");
-
-	    PasswordField pinField = new PasswordField();
-	    pinField.setMaxWidth(200);
-
-	    Button confirmBtn = new Button("Authorize");
-	    confirmBtn.setStyle("-fx-background-color: #00A950; -fx-text-fill: white;");
-
-	    confirmBtn.setOnAction(e -> {
-	        if(currentAccount != null && currentAccount.validatePin(pinField.getText())) {
-	        	executeTransaction(TransactionType, amount);
-	        	showDashboard();
-	        }
-	        else {
-	        	statusLabel.setText("Invalid PIN!");
-	            statusLabel.setStyle("-fx-text-fill: red;");
-	        }
-	    });
-
-	    layout.getChildren().addAll(statusLabel, header, subHeader, pinField, confirmBtn);
-	    return layout;
-	}
-	
-	private Node pinConfirmation(String TransactionType, String targetID, Double amount) {
-		Account receiver = myBank.getAccountId(targetID);
-		VBox layout = new VBox(15);
-	    layout.setAlignment(Pos.CENTER);
-	    Label statusLabel = new Label("");
-	    Label header = new Label("Input PIN to proceed");
-	    header.setStyle("-fx-font-family: 'Inter'; "
-	    		+ "-fx-font-size: 22px; "
-	    		+ "-fx-font-weight: bold;");
-	    
-	    Label subHeader = new Label(TransactionType + " $" + amount + "?");
+	    Label subHeader = new Label(Type + " $" + amount + "?");
 	    subHeader.setStyle("-fx-font-family: 'Inter'; "
 	    		+ "-fx-font-size: 14px; "
 	    		+ "-fx-font-weight: bold;");
@@ -356,7 +329,7 @@ public class App extends Application{
 
 	    confirmBtn.setOnAction(e -> {
 	        if(currentAccount != null && currentAccount.validatePin(pinField.getText())) {
-	        	executeTransaction(TransactionType, receiver, amount);
+	        	executeTransaction(Type, amount);
 	        	showDashboard();
 	        }
 	        else {
@@ -366,6 +339,73 @@ public class App extends Application{
 	    });
 
 	    layout.getChildren().addAll(statusLabel, header, subHeader, pinField, confirmBtn);
+	    return layout;
+	}
+	
+	private Node pinConfirmation(String Type, String targetID, Double amount) {
+		Account receiver = myBank.getAccountId(targetID);
+		VBox layout = new VBox(15);
+	    layout.setAlignment(Pos.CENTER);
+	    Label statusLabel = new Label("");
+	    Label header = new Label("Input PIN to proceed");
+	    header.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 22px; "
+	    		+ "-fx-font-weight: bold;");
+	    
+	    Label subHeader = new Label(Type + " $" + amount + "?");
+	    subHeader.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 14px; "
+	    		+ "-fx-font-weight: bold;");
+
+	    PasswordField pinField = new PasswordField();
+	    pinField.setMaxWidth(200);
+
+	    Button confirmBtn = new Button("Authorize");
+	    confirmBtn.setStyle("-fx-background-color: #00A950; "
+	    		+ "-fx-text-fill: white;");
+
+	    confirmBtn.setOnAction(e -> {
+	        if(currentAccount != null && currentAccount.validatePin(pinField.getText())) {
+	        	executeTransaction(Type, receiver, amount);
+	        	showDashboard();
+	        }
+	        else {
+	        	statusLabel.setText("Invalid PIN!");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	        }
+	    });
+
+	    layout.getChildren().addAll(statusLabel, header, subHeader, pinField, confirmBtn);
+	    return layout;
+	}
+	
+	private Node pinConfirmation(String scene) {
+		VBox layout = new VBox(15);
+	    layout.setAlignment(Pos.CENTER);
+	    Label statusLabel = new Label("");
+	    Label header = new Label("Input PIN to proceed");
+	    header.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 22px; "
+	    		+ "-fx-font-weight: bold;");
+
+	    PasswordField pinField = new PasswordField();
+	    pinField.setMaxWidth(200);
+
+	    Button confirmBtn = new Button("Authorize");
+	    confirmBtn.setStyle("-fx-background-color: #00A950; "
+	    		+ "-fx-text-fill: white;");
+
+	    confirmBtn.setOnAction(e -> {
+	        if(currentAccount != null && currentAccount.validatePin(pinField.getText())) {
+	        	resetManagerView("name");
+	        }
+	        else {
+	        	statusLabel.setText("Invalid PIN!");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	        }
+	    });
+
+	    layout.getChildren().addAll(statusLabel, header, pinField, confirmBtn);
 	    return layout;
 	}
 	
@@ -570,5 +610,81 @@ public class App extends Application{
 	    
 	    layout.getChildren().addAll(title, statusLabel, recipiantLabel, recipiantField, amountField, confirmBtn);
 	    return layout;
+	}
+	
+	private Node settingsView() {
+		VBox layout = new VBox(20);
+		HBox settings = new HBox(20);
+	    layout.setPadding(new Insets(30));
+	    
+	    Label title = new Label("Settings");
+	    title.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-weight: bold;"
+	    		+ "-fx-font-size: 40px;");
+	    
+	    Label nameLabel = new Label("Name: " + currentAccount.getName());
+	    nameLabel.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-weight: bold;"
+	    		+ "-fx-font-size: 24px;");
+	    Button resetName = new Button("Reset Name");
+	    resetName.setOnAction(e -> {
+	    	mainLayout.setCenter(pinConfirmation("name"));
+	    });
+	    
+	    settings.getChildren().addAll(nameLabel, resetName);
+	    
+	    layout.getChildren().addAll(title, settings);
+	    return layout;
+	}
+	
+	private void resetManagerView(String scene) {
+		if(scene.equals("name")) {
+			mainLayout.setCenter(resetNameView());
+		}
+	}
+	private Node resetNameView() {
+		VBox layout = new VBox(20);
+		layout.setPadding(new Insets(50));
+		layout.setAlignment(Pos.CENTER);
+		
+		layout.setStyle("-fx-background-color: #FFFFFF; "
+	    		+ "-fx-background-radius: 20; "
+	    		+ "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 10);");
+	    layout.setMaxSize(500, 300);
+	    
+	    Label statusLabel = new Label("");
+	    Label titleLabel = new Label("Input new name");
+	    titleLabel.setStyle("-fx-font-family: 'Inter'; "
+	    		+ "-fx-font-size: 18px; "
+	    		+ "-fx-text-fill: #555555;");
+	    
+		TextField newNameField = new TextField();
+		newNameField.setPromptText("Input new name...");
+		
+		Button confirm = new Button("Confirm");
+		confirm.setOnAction(e -> {
+			String newName = newNameField.getText().trim();
+			if(newName.isEmpty()) {
+				statusLabel.setText("Error: Your new name cannot be empty");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+			}
+			if(newName.equals(currentAccount.getName())){
+				statusLabel.setText("Error: Your new name cannot be same as the current one");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+			}
+			if(newName.length() > 20) {
+				statusLabel.setText("Error: Your new name cannot be longer than 20 characters");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+			}
+			currentAccount.setName(newName);
+			fh.saveAccounts(myBank.getAllAccounts());
+			showDashboard();
+			
+		});
+	    layout.getChildren().addAll(statusLabel, titleLabel, newNameField, confirm);
+		return layout;
 	}
 }
