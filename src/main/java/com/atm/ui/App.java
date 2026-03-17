@@ -18,23 +18,24 @@ public class App extends Application{
 	private int screenHeight = 800;
 	private int smallscreenWidth = 300;
 	private int smallscreenHeight = 400;
-	private AccountUpdateView updateView = new AccountUpdateView(this);
-	private PinConfirmationView pinConfirmationView = new PinConfirmationView(this);
+	private AccountUpdateView updateView;
+	private PinConfirmationView pinConfirmationView;
+	public TransactionService txService;
+	private Bank myBank;
+	FileHandler fh;
+	
 	public PinConfirmationView getPinView() {
 		return pinConfirmationView;
 	}
-	
-	public TransactionService txService;
 	private PieChart pieChart = new PieChart();
 	private BorderPane mainLayout;
 	public BorderPane getMainLayout() {
 		return this.mainLayout;
 	}
-	private Bank myBank = new Bank();
+
 	public Bank getBank() {
 		return myBank;
 	}
-	FileHandler fh = new FileHandler();
 	public FileHandler getFH() {
 		return fh;
 	}
@@ -48,11 +49,18 @@ public class App extends Application{
     public void start(Stage primaryStage) {
 		FontsLoader.loadFonts();
 		this.window = primaryStage;
-		fh.loadAccounts(myBank);
+		
+		this.myBank = new Bank();
+	    this.fh = new FileHandler();
+	    fh.loadAccounts(myBank);
+	    this.txService = new TransactionService(this);
 		
         StackPane root = new StackPane();
         Scene scene = new Scene(root, screenWidth, screenHeight);
-
+        
+        this.updateView = new AccountUpdateView(this);
+        this.pinConfirmationView = new PinConfirmationView(this);
+        
         primaryStage.setTitle("Atm-Sim");
         primaryStage.setScene(scene);
         this.txService = new TransactionService(this);
