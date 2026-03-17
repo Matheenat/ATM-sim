@@ -29,6 +29,12 @@ public class LoginView extends BaseView{
 			}
 		});
 		
+		pinField.textProperty().addListener((observable, oldValue, newValue) -> {
+		    if (!newValue.matches("\\d*")) {
+		        pinField.setText(newValue.replaceAll("[^\\d]", ""));
+		    }
+		});
+		
 		Button loginbtn = new Button("Login");
 		loginbtn.setOnAction(e -> {
 			Account acc = app.getBank().loginCheck(idField.getText(), pinField.getText());

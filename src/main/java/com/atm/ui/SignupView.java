@@ -25,9 +25,15 @@ public class SignupView extends BaseView{
 	    Label nameLabel = new Label("Input name");
 	    TextField nameField = new TextField();
 	    Label pinLabel = new Label("Create Pin:");
-		PasswordField pinField = new PasswordField();
+	    PasswordField pinField = new PasswordField();
 	    Label startDeposit = new Label("Initial Deposit:");
 	    TextField depositField = new TextField();
+	    
+		pinField.textProperty().addListener((observable, oldValue, newValue) -> {
+		    if (!newValue.matches("\\d*")) {
+		        pinField.setText(newValue.replaceAll("[^\\d]", ""));
+		    }
+		});
 	    
 	    nameField.setOnKeyPressed(event -> {
 	    	if(event.getCode().equals(KeyCode.ENTER)) {
@@ -46,6 +52,11 @@ public class SignupView extends BaseView{
 	    	String name = nameField.getText().trim();
 	    	if(name.length() > 20) {
 	    		statusLabel.setText("Error: Name cannot be longer than 20 characters");
+	            statusLabel.setStyle("-fx-text-fill: red;");
+	            return;
+	    	}
+	    	if(name.isEmpty()) {
+	    		statusLabel.setText("Error: Name cannot be empty");
 	            statusLabel.setStyle("-fx-text-fill: red;");
 	            return;
 	    	}
