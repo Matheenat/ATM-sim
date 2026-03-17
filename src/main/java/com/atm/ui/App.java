@@ -97,6 +97,9 @@ public class App extends Application{
 	}
 	
 	public void calculateCashFlow() {
+		if(currentAccount == null) {
+			return;
+		}
 		CashFlowData data = new CashFlowData(currentAccount);
 		updateDashboardChart(data.getTotalWithdraw(), data.getTotalDeposit(), data.getTotalTransfer(), data.getTotalReceived());
 	}

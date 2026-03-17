@@ -12,6 +12,7 @@ public class TransactionService {
     public void execute(String type, Account receiver, Double amount) {
         TransactionManager.process(app.getCurrentAccount(), type, receiver, amount);
         app.getFH().saveAccounts(app.getBank().getAllAccounts());
+        app.calculateCashFlow();
         app.showDashboard();
     }
 }
