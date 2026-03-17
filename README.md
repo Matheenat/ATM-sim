@@ -27,3 +27,6 @@ CHANGELOG
 3/17/26
 
         -Implement pie chart
+        -Big clean up
+        -Even BIGGER clean up
+        -Finished cleaning up
