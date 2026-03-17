@@ -1,5 +1,6 @@
 package com.atm.ui;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -58,14 +59,18 @@ public class DashboardView extends BaseView {
         Button depositBtn = createNavButton("Deposit");
         Button transferBtn = createNavButton("Transfer");
         Button settingsBtn = createNavButton("Settings");
+        Button logoutBtn = createNavButton("Logout");
+        Button exitBtn = createNavButton("Exit");
 
         checkBalanceBtn.setOnAction(e -> app.balanceView());
         withdrawBtn.setOnAction(e -> app.withdrawView());
         depositBtn.setOnAction(e -> app.depositView());
         transferBtn.setOnAction(e -> app.transferView());
         settingsBtn.setOnAction(e -> app.settingsView());
+        logoutBtn.setOnAction(e -> app.logout());
+        exitBtn.setOnAction(e -> Platform.exit());
 
-        leftBar.getChildren().addAll(welcomeGroup, checkBalanceBtn, withdrawBtn, depositBtn, transferBtn, settingsBtn);
+        leftBar.getChildren().addAll(welcomeGroup, checkBalanceBtn, withdrawBtn, depositBtn, transferBtn, settingsBtn, logoutBtn, exitBtn);
         mainLayout.setLeft(leftBar);
 
         VBox historyList = new VBox(20);

@@ -14,8 +14,8 @@ import com.atm.util.FontsLoader;
 public class App extends Application{
 	private Stage window;
 	private Account currentAccount;
-	private int screenWidth = 1000;
-	private int screenHeight = 700;
+	private int screenWidth = 1200;
+	private int screenHeight = 800;
 	private int smallscreenWidth = 300;
 	private int smallscreenHeight = 400;
 	private AccountUpdateView updateView = new AccountUpdateView(this);
@@ -58,6 +58,11 @@ public class App extends Application{
         this.txService = new TransactionService(this);
         showLogin();
     }
+	
+	public void logout() {
+		this.currentAccount = null;
+		showLogin();
+	}
 	
 	public void showLogin() {
 		LoginView loginview = new LoginView(this);
