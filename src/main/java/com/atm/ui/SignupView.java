@@ -92,8 +92,10 @@ public class SignupView extends BaseView{
     		app.getBank().addAccount(acc);
     		app.fh.saveAccounts(app.getBank().getAllAccounts());
     		app.showSuccess(acc.getID());
-	    	
+    		
 	    });
+	    Button backBtn = new Button("Back");
+	    backBtn.setOnAction(e -> app.showLogin());
 	    grid.add(statusLabel, 0, 0);
 	    grid.add(nameLabel, 0, 1);
 	    grid.add(nameField, 0, 2);
@@ -102,6 +104,7 @@ public class SignupView extends BaseView{
 	    grid.add(startDeposit, 0, 5);
 	    grid.add(depositField, 0, 6);
 	    grid.add(createAcc, 0, 7);
+	    grid.add(backBtn, 0, 8);
 	    
 	    return grid;
 	}
